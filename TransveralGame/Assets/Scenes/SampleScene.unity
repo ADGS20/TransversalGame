@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scriptJugadorPrincipal: {fileID: 1469842726}
+  rbJugadorPrincipal: {fileID: 1469842728}
   companionController: {fileID: 2142668505}
   teclaCambio: 9
   puedeCambiar: 0

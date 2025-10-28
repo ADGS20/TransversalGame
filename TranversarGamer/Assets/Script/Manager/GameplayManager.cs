@@ -1,37 +1,48 @@
 using UnityEngine;
 
 /// <summary>
-/// Gestiona el cambio entre el jugador principal y el compa�ero
+/// Gestiona el cambio entre el jugador principal y el companero
 /// </summary>
 public class GameplayManager : MonoBehaviour
 {
     [Header("Referencias")]
     [Tooltip("Script de movimiento del jugador principal")]
-    public MonoBehaviour scriptJugadorPrincipal; // Tu Mov_Player2D
+    public MonoBehaviour scriptJugadorPrincipal; // Tu Mov_Player3D
 
-    [Tooltip("Rigidbody2D del jugador principal")]
-    public Rigidbody2D rbJugadorPrincipal;
-
-    [Tooltip("Script del compa�ero")]
+    [Tooltip("Script del compañero")]
     public CompainController companionController;
 
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     [Tooltip("Tecla para cambiar de personaje")]
     public KeyCode teclaCambio = KeyCode.Tab;
 
-    [Tooltip("�Se puede cambiar de personaje actualmente?")]
+    [Tooltip("¿Se puede cambiar de personaje actualmente?")]
     public bool puedeCambiar = false;
+
+    [Header("Cámara (Opcional)")]
+    [Tooltip("Cámara que seguirá al personaje activo")]
+    public Transform camaraTransform;
+
+    [Tooltip("Offset de la cámara respecto al personaje")]
+    public Vector3 offsetCamara = new Vector3(0, 10, -10);
+
+    [Tooltip("Velocidad de seguimiento de la cámara")]
+    public float velocidadCamara = 5f;
 
     // Estado actual
     private bool controlandoCompanion = false;
+    private Transform objetivoActual;
 
     void Start()
     {
-        // Si no se asign� el Rigidbody2D, intentar obtenerlo
-        if (rbJugadorPrincipal == null && scriptJugadorPrincipal != null)
+        // Configurar cámara si no está asignada
+        if (camaraTransform == null)
         {
-            rbJugadorPrincipal = scriptJugadorPrincipal.GetComponent<Rigidbody2D>();
+            camaraTransform = Camera.main.transform;
         }
+
+        // El objetivo inicial es el jugador principal
+        objetivoActual = scriptJugadorPrincipal.transform;
     }
 
     void Update()
@@ -41,10 +52,17 @@ public class GameplayManager : MonoBehaviour
         {
             CambiarPersonaje();
         }
+
+        // Actualizar posición de la cámara
+        if (camaraTransform != null && objetivoActual != null)
+        {
+            Vector3 posicionObjetivo = objetivoActual.position + offsetCamara;
+            camaraTransform.position = Vector3.Lerp(camaraTransform.position, posicionObjetivo, velocidadCamara * Time.deltaTime);
+        }
     }
 
     /// <summary>
-    /// Alterna entre controlar al jugador principal y al compa�ero
+    /// Alterna entre controlar al jugador principal y al compañero
     /// </summary>
     public void CambiarPersonaje()
     {
@@ -52,23 +70,18 @@ public class GameplayManager : MonoBehaviour
 
         if (controlandoCompanion)
         {
-            // Cambiar a controlar el compa�ero
+            // Cambiar a controlar el compañero
             scriptJugadorPrincipal.enabled = false;
-
-            // Detener el movimiento del jugador principal
-            if (rbJugadorPrincipal != null)
-            {
-                rbJugadorPrincipal.linearVelocity = Vector2.zero;
-            }
-
             companionController.ActivarControl();
-            Debug.Log("Controlando al compa�ero");
+            objetivoActual = companionController.transform;
+            Debug.Log("Controlando al compañero");
         }
         else
         {
             // Cambiar a controlar el jugador principal
             scriptJugadorPrincipal.enabled = true;
             companionController.DesactivarControl();
+            objetivoActual = scriptJugadorPrincipal.transform;
             Debug.Log("Controlando al jugador principal");
         }
     }
@@ -79,6 +92,7 @@ public class GameplayManager : MonoBehaviour
     public void HabilitarCambio()
     {
         puedeCambiar = true;
+        Debug.Log("Zona de cambio activada. Presiona Tab para alternar.");
     }
 
     /// <summary>
