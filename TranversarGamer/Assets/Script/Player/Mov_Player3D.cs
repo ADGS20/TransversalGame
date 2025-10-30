@@ -1,42 +1,49 @@
 using UnityEngine;
 
 /// <summary>
-/// Script de movimiento para jugador en 2.5D
-/// Movimiento en plano XZ (suelo) con c·mara ortogr·fica
-/// Estilo PokÈmon Blanco/Negro o Zelda
+/// Script de movimiento para jugador en 2.5D usando Rigidbody
+/// Movimiento RELATIVO A LA C√ÅMARA (proyectado en plano XZ)
+/// W siempre aleja de la c√°mara, S siempre acerca
 /// </summary>
-
 public class Mov_Player3D : MonoBehaviour
 {
-    [Header("ConfiguraciÛn de Movimiento")]
+    [Header("Configuraci√≥n de Movimiento")]
     [Tooltip("Velocidad de movimiento del jugador")]
     [SerializeField] private float velocidad = 5f;
 
-    [Header("ConfiguraciÛn de RotaciÛn")]
-    [Tooltip("Velocidad de rotaciÛn del personaje")]
-    [SerializeField] private float velocidadRotacion = 10f;
-
-    [Header("AnimaciÛn (Opcional)")]
+    [Header("Animaci√≥n (Opcional)")]
     [SerializeField] private Animator animator;
 
-    // Variables privadas para almacenar el input del jugador
+    [Header("C√°mara")]
+    private Camera camaraJuego;
+
+    // Variables privadas
     private float movimientoHorizontal;
     private float movimientoVertical;
     private Vector3 direccionMovimiento;
-    private CharacterController characterController;
+    private Rigidbody rb;
 
     void Start()
     {
-        // Obtener CharacterController si existe
-        characterController = GetComponent<CharacterController>();
-
-        // Si no tiene CharacterController, aÒadirlo
-        if (characterController == null)
+        // Obtener Rigidbody
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
         {
-            characterController = gameObject.AddComponent<CharacterController>();
-            characterController.center = new Vector3(0, 1, 0);
-            characterController.radius = 0.5f;
-            characterController.height = 2f;
+            rb = gameObject.AddComponent<Rigidbody>();
+        }
+
+        // Configurar Rigidbody para movimiento 2.5D
+        rb.constraints = RigidbodyConstraints.FreezeRotationX |
+                        RigidbodyConstraints.FreezeRotationZ |
+                        RigidbodyConstraints.FreezePositionY;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // Obtener c√°mara principal
+        camaraJuego = Camera.main;
+        if (camaraJuego == null)
+        {
+            Debug.LogError("‚ùå No se encontr√≥ la c√°mara principal");
         }
 
         // Obtener animator si existe
@@ -44,45 +51,65 @@ public class Mov_Player3D : MonoBehaviour
         {
             animator = GetComponent<Animator>();
         }
+
+        Debug.Log("üéÆ Mov_Player3D iniciado - Controles relativos a la c√°mara");
     }
 
-    /// <summary>
-    /// Se ejecuta cada frame
-    /// Captura el input y mueve al jugador
-    /// </summary>
     void Update()
     {
-        // Capturar input horizontal (A/D o Flechas Izquierda/Derecha)
-        movimientoHorizontal = Input.GetAxisRaw("Horizontal");
+        // Capturar input
+        movimientoHorizontal = Input.GetAxisRaw("Horizontal"); // A/D
+        movimientoVertical = Input.GetAxisRaw("Vertical");     // W/S
 
-        // Capturar input vertical (W/S o Flechas Arriba/Abajo)
-        movimientoVertical = Input.GetAxisRaw("Vertical");
+        // Calcular direcci√≥n RELATIVA A LA C√ÅMARA (PROYECTADA EN PLANO XZ)
+        if (camaraJuego != null)
+        {
+            // Obtener forward de la c√°mara y proyectarlo en el plano XZ
+            Vector3 camaraForward = camaraJuego.transform.forward;
+            camaraForward.y = 0; // Proyectar en plano horizontal
+            camaraForward.Normalize(); // Normalizar despu√©s de eliminar Y
 
-        // Crear vector de direcciÛn en el plano XZ (suelo)
-        // X = izquierda/derecha, Z = adelante/atr·s, Y = 0 (sin altura)
-        direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
+            // Obtener right de la c√°mara y proyectarlo en el plano XZ
+            Vector3 camaraRight = camaraJuego.transform.right;
+            camaraRight.y = 0; // Proyectar en plano horizontal
+            camaraRight.Normalize(); // Normalizar despu√©s de eliminar Y
 
-        // Normalizar para que el movimiento diagonal no sea m·s r·pido
+            // Crear vector de movimiento relativo a la c√°mara
+            // W = Alejar de c√°mara (direcci√≥n opuesta a donde mira)
+            // S = Acercar a c√°mara (direcci√≥n hacia donde mira)
+            direccionMovimiento = (camaraRight * movimientoHorizontal - camaraForward * movimientoVertical);
+        }
+        else
+        {
+            // Fallback si no hay c√°mara
+            direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
+        }
+
+        // Normalizar para movimiento diagonal
         if (direccionMovimiento.magnitude > 1)
         {
             direccionMovimiento.Normalize();
         }
 
-        // Mover al jugador usando CharacterController
-        characterController.Move(direccionMovimiento * velocidad * Time.deltaTime);
-
-        // Rotar al jugador hacia la direcciÛn de movimiento
-        if (direccionMovimiento != Vector3.zero)
-        {
-            Quaternion rotacionObjetivo = Quaternion.LookRotation(direccionMovimiento);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, velocidadRotacion * Time.deltaTime);
-        }
-
-        // Actualizar animaciones (si tienes animator)
+        // Actualizar animaciones
         if (animator != null)
         {
-            // Par·metro "Velocidad" en el Animator (0 = idle, 1 = caminando)
             animator.SetFloat("Velocidad", direccionMovimiento.magnitude);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // Mover usando f√≠sica
+        Vector3 nuevaPosicion = rb.position + direccionMovimiento * velocidad * Time.fixedDeltaTime;
+        rb.MovePosition(nuevaPosicion);
+    }
+
+    void OnDisable()
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
         }
     }
 }
