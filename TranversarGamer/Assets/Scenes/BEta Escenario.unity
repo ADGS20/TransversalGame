@@ -1815,7 +1815,7 @@ Transform:
   m_GameObject: {fileID: 1367608008}
   serializedVersion: 2
   m_LocalRotation: {x: 0.2588191, y: -0, z: -0, w: 0.9659258}
-  m_LocalPosition: {x: -29.08, y: 5.41, z: -6.93}
+  m_LocalPosition: {x: -26.13, y: 6, z: -10.93}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1833,13 +1833,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10b19f5ee65dc204bbe63264eaf5de8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distancia: 10
-  altura: 8
+  velocidadSeguimiento: 5
+  usarSuavizado: 1
   teclaRotarDerecha: 113
   teclaRotarIzquierda: 101
   velocidadRotacion: 5
-  velocidadSeguimiento: 5
-  usarSuavizado: 1
+  yCerca: 2.75
+  yLejos: 6
+  planoCerca: 3.64
+  planoLejos: 11
+  zoomFactorInicial: 0.5
+  velocidadZoom: 6
+  suavizadoZoom: 10
+  teclaAcercar: 122
+  teclaAlejar: 120
 --- !u!54 &1523240555 stripped
 Rigidbody:
   m_CorrespondingSourceObject: {fileID: 5095400866907142382, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
@@ -1931,7 +1938,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0a290234811166429511fb6fa7449a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameplayManager: {fileID: 0}
+  gameplayManager: {fileID: 1598424367}
   indicadorVisual: {fileID: 0}
   colorActivo: {r: 0, g: 1, b: 0, a: 1}
   colorInactivo: {r: 1, g: 1, b: 1, a: 1}

@@ -1,75 +1,82 @@
-﻿using UnityEngine;
+﻿//---------------Creador de este script-------------------------//
+//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
+//-------------------------------------------------------------//
 
-/// <summary>
-/// Sistema de cámara orbital que gira en incrementos de 90 grados con teclas E y Q
-/// CORREGIDO: Ahora anguloActual = 0 significa rotación Y = 0
-/// </summary>
+using UnityEngine;
+
+/// Cámara orbital con rotación en pasos (E/Q) y zoom en riel Y + distancia en plano,
+/// sin interferir con la rotación/movimiento físico de los personajes.
 public class CameraOrbital : MonoBehaviour
 {
-    [Header("Configuración de Cámara")]
-    [Tooltip("Distancia de la cámara al objetivo")]
-    [SerializeField] private float distancia = 10f;
-
-    [Tooltip("Altura de la cámara sobre el objetivo")]
-    [SerializeField] private float altura = 8f;
-
-    [Header("Configuración de Rotación")]
-    [Tooltip("Tecla para rotar a la derecha")]
-    [SerializeField] private KeyCode teclaRotarDerecha = KeyCode.E;
-
-    [Tooltip("Tecla para rotar a la izquierda")]
-    [SerializeField] private KeyCode teclaRotarIzquierda = KeyCode.Q;
-
-    [Tooltip("Velocidad de rotación suave")]
-    [SerializeField] private float velocidadRotacion = 5f;
-
-    [Header("Suavizado")]
-    [Tooltip("Velocidad de seguimiento del objetivo")]
-    [SerializeField] private float velocidadSeguimiento = 5f;
-
-    [Tooltip("¿Usar suavizado en el seguimiento?")]
+    [Header("Seguimiento")]
+    [SerializeField] private float velocidadSeguimiento = 10f;
     [SerializeField] private bool usarSuavizado = true;
 
-    // Variables privadas
+    [Header("Rotación (90°)")]
+    [SerializeField] private KeyCode teclaRotarDerecha = KeyCode.E;
+    [SerializeField] private KeyCode teclaRotarIzquierda = KeyCode.Q;
+    [SerializeField] private float velocidadRotacion = 10f;
+
+    [Header("Zoom (riel)")]
+    [Tooltip("Altura mínima (más cerca)")]
+    [SerializeField] private float yCerca = 2.75f;
+    [Tooltip("Altura máxima (más lejos)")]
+    [SerializeField] private float yLejos = 6.0f;
+
+    [Tooltip("Distancia en plano mínima (más cerca). Usa valores positivos")]
+    [SerializeField] private float planoCerca = 3.64f; // equivalente a |Z| 3.64
+    [Tooltip("Distancia en plano máxima (más lejos). Usa valores positivos")]
+    [SerializeField] private float planoLejos = 11.0f; // equivalente a |Z| 11
+
+    [Tooltip("Factor de zoom inicial (0 = lejos, 1 = cerca)")]
+    [Range(0f, 1f)]
+    [SerializeField] private float zoomFactorInicial = 0.5f;
+
+    [SerializeField] private float velocidadZoom = 1.5f;
+    [SerializeField] private float suavizadoZoom = 10f;
+    [SerializeField] private KeyCode teclaAcercar = KeyCode.Z;
+    [SerializeField] private KeyCode teclaAlejar = KeyCode.X;
+
     private Transform objetivo;
+
+    // Estado rotación
     private float anguloActual = 0f;
     private float anguloObjetivo = 0f;
     private bool estaRotando = false;
-    private Vector3 posicionObjetivoSuavizada;
+
+    // Estado seguimiento
+    private Vector3 posSuavizada;
+
+    // Estado zoom
+    private float zoomFactorObjetivo;
+    private float zoomFactorActual;
 
     void Start()
     {
-        // No buscar objetivo automáticamente
+        zoomFactorObjetivo = zoomFactorActual = Mathf.Clamp01(zoomFactorInicial);
     }
 
     void Update()
     {
         if (objetivo == null) return;
 
-        // Detectar input de teclas para rotar
         DetectarRotacion();
+        DetectarZoom();
 
-        // Actualizar posición suavizada del objetivo
-        if (usarSuavizado)
-        {
-            posicionObjetivoSuavizada = Vector3.Lerp(
-                posicionObjetivoSuavizada,
-                objetivo.position,
-                velocidadSeguimiento * Time.deltaTime
-            );
-        }
-        else
-        {
-            posicionObjetivoSuavizada = objetivo.position;
-        }
+        // Suavizar target
+        posSuavizada = usarSuavizado
+            ? Vector3.Lerp(posSuavizada, objetivo.position, velocidadSeguimiento * Time.deltaTime)
+            : objetivo.position;
 
-        // Interpolar ángulo actual hacia el objetivo
+        // Suavizar rotación de cámara (solo el ángulo interno, no el transform del objetivo)
         anguloActual = Mathf.LerpAngle(anguloActual, anguloObjetivo, velocidadRotacion * Time.deltaTime);
 
-        // Actualizar posición de la cámara
-        ActualizarPosicionCamara();
+        // Suavizar zoom
+        zoomFactorActual = Mathf.Lerp(zoomFactorActual, zoomFactorObjetivo, suavizadoZoom * Time.deltaTime);
 
-        // Verificar si terminó la rotación
+        // Actualizar cámara con cálculos puros
+        ActualizarCamara();
+
         if (estaRotando && Mathf.Abs(Mathf.DeltaAngle(anguloActual, anguloObjetivo)) < 0.1f)
         {
             anguloActual = anguloObjetivo;
@@ -79,91 +86,91 @@ public class CameraOrbital : MonoBehaviour
 
     private void DetectarRotacion()
     {
-        // Solo detectar si no está rotando actualmente
         if (estaRotando) return;
 
-        // Rotar a la derecha con tecla E
         if (Input.GetKeyDown(teclaRotarDerecha))
-        {
-            RotarCamara(90f);
-        }
-        // Rotar a la izquierda con tecla Q
+            SetRotacionObjetivo(anguloObjetivo + 90f);
         else if (Input.GetKeyDown(teclaRotarIzquierda))
-        {
-            RotarCamara(-90f);
-        }
+            SetRotacionObjetivo(anguloObjetivo - 90f);
     }
 
-    private void RotarCamara(float incremento)
+    private void SetRotacionObjetivo(float deg)
     {
-        anguloObjetivo += incremento;
-        anguloObjetivo = NormalizarAngulo(anguloObjetivo);
+        anguloObjetivo = NormalizarAngulo(deg);
         estaRotando = true;
-
-        Debug.Log($"🎥 Cámara rotando a {anguloObjetivo}°");
     }
 
-    private void ActualizarPosicionCamara()
+    private void DetectarZoom()
     {
-        // IMPORTANTE: Restar 180° para que anguloActual=0 resulte en Y=0
-        float anguloCorregido = anguloActual - 180f;
-        float anguloRad = anguloCorregido * Mathf.Deg2Rad;
+        // Rueda del ratón: + acercar, - alejar
+        float scroll = Input.mouseScrollDelta.y;
+        if (Mathf.Abs(scroll) > 0.01f)
+            zoomFactorObjetivo += scroll * (velocidadZoom * 0.1f);
 
-        // Calcular offset de la cámara
-        Vector3 offset = new Vector3(
-            Mathf.Sin(anguloRad) * distancia,
-            altura,
-            Mathf.Cos(anguloRad) * distancia
-        );
+        if (Input.GetKey(teclaAcercar))
+            zoomFactorObjetivo += velocidadZoom * Time.deltaTime;
+        if (Input.GetKey(teclaAlejar))
+            zoomFactorObjetivo -= velocidadZoom * Time.deltaTime;
 
-        transform.position = posicionObjetivoSuavizada + offset;
+        zoomFactorObjetivo = Mathf.Clamp01(zoomFactorObjetivo);
+    }
 
-        // Mirar hacia el objetivo
-        Vector3 direccion = posicionObjetivoSuavizada - transform.position;
-        Quaternion rotacionMirar = Quaternion.LookRotation(direccion);
-        transform.rotation = rotacionMirar;
+    private void ActualizarCamara()
+    {
+        // Interpolamos altura y distancia en plano según factor
+        float y = Mathf.Lerp(yLejos, yCerca, zoomFactorActual);
+        float plano = Mathf.Lerp(planoLejos, planoCerca, zoomFactorActual); // positivo
 
-        Debug.Log($"📐 Ángulo interno: {anguloActual}° | Rotación Y cámara: {transform.eulerAngles.y}°");
+        // Calcular forward plano a partir del yaw interno (sin tocar transforms externos)
+        // Nuestro sistema previo usa anguloActual=0 alineado con Y=0 mirando +Z (corregido en versiones previas).
+        float yawRad = (anguloActual) * Mathf.Deg2Rad;
+        Vector3 forwardPlano = new Vector3(Mathf.Sin(yawRad), 0, Mathf.Cos(yawRad)); // normalizado
+        Vector3 rightPlano = new Vector3(Mathf.Cos(yawRad), 0, -Mathf.Sin(yawRad));  // por si se necesita
+
+        // Offset: nos colocamos "plano" unidades detrás del objetivo respecto a su forward (alejado de él)
+        // Detrás = -forwardPlano
+        Vector3 offsetPlano = -forwardPlano * plano;
+
+        // Posición final: riel Y y desplazamiento en plano con el yaw actual
+        Vector3 camPos = posSuavizada + offsetPlano;
+        camPos.y = posSuavizada.y + y; // altura relativa al objetivo
+
+        transform.position = camPos;
+
+        // Mirar al objetivo sin tocar su rotación
+        Vector3 dir = posSuavizada - transform.position;
+        if (dir.sqrMagnitude > 0.0001f)
+            transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
     }
 
     private float NormalizarAngulo(float angulo)
     {
-        angulo = angulo % 360f;
-        if (angulo < 0f)
-        {
-            angulo += 360f;
-        }
+        angulo %= 360f;
+        if (angulo < 0f) angulo += 360f;
         return angulo;
     }
 
+    // API pública
     public void CambiarObjetivo(Transform nuevoObjetivo)
     {
         objetivo = nuevoObjetivo;
         if (objetivo != null)
-        {
-            posicionObjetivoSuavizada = objetivo.position;
-        }
+            posSuavizada = objetivo.position;
     }
 
-    public float ObtenerAnguloActual()
-    {
-        return anguloActual;
-    }
+    public float ObtenerAnguloActual() => anguloActual;
 
-    public bool EstaRotando()
-    {
-        return estaRotando;
-    }
+    public bool EstaRotando() => estaRotando;
 
     public Vector3 ObtenerDireccionForward()
     {
-        float anguloRad = anguloActual * Mathf.Deg2Rad;
-        return new Vector3(Mathf.Sin(anguloRad), 0, Mathf.Cos(anguloRad));
+        float yawRad = anguloActual * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(yawRad), 0, Mathf.Cos(yawRad));
     }
 
     public Vector3 ObtenerDireccionRight()
     {
-        float anguloRad = anguloActual * Mathf.Deg2Rad;
-        return new Vector3(Mathf.Cos(anguloRad), 0, -Mathf.Sin(anguloRad));
+        float yawRad = anguloActual * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Cos(yawRad), 0, -Mathf.Sin(yawRad));
     }
 }

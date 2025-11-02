@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿//---------------Creador de este script-------------------------//
+//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
+//-------------------------------------------------------------//
+
+using UnityEngine;
 
 /// <summary>
 /// Zona donde se puede alternar entre el jugador principal y el compañero

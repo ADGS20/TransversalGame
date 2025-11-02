@@ -1,8 +1,12 @@
+//---------------Creador de este script-------------------------//
+//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
+//-------------------------------------------------------------//
+
 using UnityEngine;
 
 /// <summary>
 /// Gestiona el cambio entre el jugador principal y el compañero en 2.5D
-/// SINCRONIZA LA ROTACIÓN DE LA CÁMARA CON LOS PERSONAJES
+/// CALCULA EL MOVIMIENTO RELATIVO A LA CÁMARA
 /// </summary>
 public class GameplayManager : MonoBehaviour
 {
@@ -81,12 +85,52 @@ public class GameplayManager : MonoBehaviour
         {
             CambiarPersonaje();
         }
+
+        // CALCULAR MOVIMIENTO RELATIVO A LA CÁMARA
+        CalcularMovimientoRelativoCamara();
     }
 
     void FixedUpdate()
     {
         // SINCRONIZAR ROTACIÓN DE LA CÁMARA CON LOS PERSONAJES
         SincronizarRotacionConCamara();
+    }
+
+    /// <summary>
+    /// Calcula el movimiento relativo a la cámara y lo envía al personaje activo
+    /// </summary>
+    private void CalcularMovimientoRelativoCamara()
+    {
+        if (camaraOrbital == null) return;
+
+        // Capturar input
+        float horizontal = Input.GetAxisRaw("Horizontal"); // A/D
+        float vertical = Input.GetAxisRaw("Vertical");     // W/S
+
+        // Obtener direcciones de la cámara (ya proyectadas en XZ)
+        Vector3 camaraForward = camaraOrbital.ObtenerDireccionForward();
+        Vector3 camaraRight = camaraOrbital.ObtenerDireccionRight();
+
+        // Calcular dirección de movimiento relativa a la cámara
+        // W (vertical > 0) = Alejar de cámara (dirección opuesta a donde mira) = +camaraForward
+        // S (vertical < 0) = Acercar a cámara (dirección hacia donde mira) = -camaraForward
+        Vector3 direccion = (camaraRight * horizontal + camaraForward * vertical);
+
+        // Normalizar para movimiento diagonal
+        if (direccion.magnitude > 1)
+        {
+            direccion.Normalize();
+        }
+
+        // Enviar dirección al personaje activo
+        if (!controlandoCompanion && scriptJugadorPrincipal != null)
+        {
+            scriptJugadorPrincipal.EstablecerDireccion(direccion);
+        }
+        else if (controlandoCompanion && companionController != null)
+        {
+            companionController.EstablecerDireccion(direccion);
+        }
     }
 
     /// <summary>

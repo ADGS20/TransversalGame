@@ -1,27 +1,32 @@
+//---------------Creador de este script-------------------------//
+//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
+//-------------------------------------------------------------//
+
 using UnityEngine;
 
 /// <summary>
 /// Script de movimiento para jugador en 2.5D usando Rigidbody
-/// Movimiento RELATIVO A LA CÁMARA (proyectado en plano XZ)
-/// W siempre aleja de la cámara, S siempre acerca
+/// RECIBE la dirección de movimiento desde GameplayManager
 /// </summary>
 public class Mov_Player3D : MonoBehaviour
 {
     [Header("Configuración de Movimiento")]
-    [Tooltip("Velocidad de movimiento del jugador")]
+    [Tooltip("Velocidad base de movimiento del jugador")]
     [SerializeField] private float velocidad = 5f;
+
+    [Header("Correr")]
+    [Tooltip("¿Permitir correr con Shift?")]
+    [SerializeField] private bool permitirCorrer = true;
+
+    [Tooltip("Multiplicador de velocidad al correr")]
+    [SerializeField] private float multiplicadorCorrer = 1.6f;
 
     [Header("Animación (Opcional)")]
     [SerializeField] private Animator animator;
 
-    [Header("Cámara")]
-    private Camera camaraJuego;
-
     // Variables privadas
-    private float movimientoHorizontal;
-    private float movimientoVertical;
-    private Vector3 direccionMovimiento;
     private Rigidbody rb;
+    private Vector3 direccionMovimiento;
 
     void Start()
     {
@@ -39,70 +44,52 @@ public class Mov_Player3D : MonoBehaviour
         rb.useGravity = false;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // Obtener cámara principal
-        camaraJuego = Camera.main;
-        if (camaraJuego == null)
-        {
-            Debug.LogError("❌ No se encontró la cámara principal");
-        }
-
         // Obtener animator si existe
         if (animator == null)
         {
             animator = GetComponent<Animator>();
         }
 
-        Debug.Log("🎮 Mov_Player3D iniciado - Controles relativos a la cámara");
+        Debug.Log("🎮 Mov_Player3D iniciado");
     }
 
     void Update()
     {
-        // Capturar input
-        movimientoHorizontal = Input.GetAxisRaw("Horizontal"); // A/D
-        movimientoVertical = Input.GetAxisRaw("Vertical");     // W/S
-
-        // Calcular dirección RELATIVA A LA CÁMARA (PROYECTADA EN PLANO XZ)
-        if (camaraJuego != null)
-        {
-            // Obtener forward de la cámara y proyectarlo en el plano XZ
-            Vector3 camaraForward = camaraJuego.transform.forward;
-            camaraForward.y = 0; // Proyectar en plano horizontal
-            camaraForward.Normalize(); // Normalizar después de eliminar Y
-
-            // Obtener right de la cámara y proyectarlo en el plano XZ
-            Vector3 camaraRight = camaraJuego.transform.right;
-            camaraRight.y = 0; // Proyectar en plano horizontal
-            camaraRight.Normalize(); // Normalizar después de eliminar Y
-
-            // Crear vector de movimiento relativo a la cámara
-            // W = Alejar de cámara (dirección opuesta a donde mira)
-            // S = Acercar a cámara (dirección hacia donde mira)
-            direccionMovimiento = (camaraRight * movimientoHorizontal - camaraForward * movimientoVertical);
-        }
-        else
-        {
-            // Fallback si no hay cámara
-            direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
-        }
-
-        // Normalizar para movimiento diagonal
-        if (direccionMovimiento.magnitude > 1)
-        {
-            direccionMovimiento.Normalize();
-        }
-
         // Actualizar animaciones
         if (animator != null)
         {
-            animator.SetFloat("Velocidad", direccionMovimiento.magnitude);
+            float speedFactor = ObtenerFactorCorrer();
+            animator.SetFloat("Velocidad", direccionMovimiento.magnitude * speedFactor);
+            animator.SetBool("Corriendo", permitirCorrer && EstaCorriendo());
         }
     }
 
     void FixedUpdate()
     {
         // Mover usando física
-        Vector3 nuevaPosicion = rb.position + direccionMovimiento * velocidad * Time.fixedDeltaTime;
+        float speedFactor = ObtenerFactorCorrer();
+        Vector3 nuevaPosicion = rb.position + direccionMovimiento * (velocidad * speedFactor) * Time.fixedDeltaTime;
         rb.MovePosition(nuevaPosicion);
+    }
+
+    /// <summary>
+    /// Establece la dirección de movimiento (llamado desde GameplayManager)
+    /// </summary>
+    public void EstablecerDireccion(Vector3 direccion)
+    {
+        direccionMovimiento = direccion;
+    }
+
+    private bool EstaCorriendo()
+    {
+        // Shift izquierdo o derecho
+        return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+    }
+
+    private float ObtenerFactorCorrer()
+    {
+        if (!permitirCorrer) return 1f;
+        return EstaCorriendo() ? multiplicadorCorrer : 1f;
     }
 
     void OnDisable()
@@ -110,6 +97,13 @@ public class Mov_Player3D : MonoBehaviour
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
+        }
+        direccionMovimiento = Vector3.zero;
+
+        if (animator != null)
+        {
+            animator.SetBool("Corriendo", false);
+            animator.SetFloat("Velocidad", 0f);
         }
     }
 }
