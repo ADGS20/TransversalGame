@@ -1586,8 +1586,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 600730646}
     m_Modifications:
     - target: {fileID: 176512501841986580, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
+      propertyPath: esControlable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 176512501841986580, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: distanciaMinima
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 176512501841986580, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: jugadorPrincipal
