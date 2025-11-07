@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 5687715354709867048}
   m_Layer: 0
   m_Name: Jugador
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -124,10 +124,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocidad: 5
-  anguloInclinacionX: 45
-  mirarACamara: 1
-  rotacionSuave: 0
-  velocidadRotacion: 10
+  permitirCorrer: 1
+  multiplicadorCorrer: 1.6
   animator: {fileID: 0}
 --- !u!54 &5687715354709867048
 Rigidbody:
