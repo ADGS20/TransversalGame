@@ -192,7 +192,7 @@ public class GameplayManager : MonoBehaviour
                 }
             }
 
-            Debug.Log("🐾 Controlando al COMPAÑERO");
+            Debug.Log("🐾 Controlando al COMPANERO");
         }
         else
         {
