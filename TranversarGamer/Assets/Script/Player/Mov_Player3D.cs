@@ -1,6 +1,6 @@
-//---------------Creador de este script-------------------------//
-//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
-//-------------------------------------------------------------//
+//----Creador de este script----//
+//---- Hecho por: Andres Diaz Guerrero Soto ----//
+//----//
 
 using UnityEngine;
 
@@ -8,11 +8,11 @@ using UnityEngine;
 /// Script de movimiento para jugador en 2.5D usando Rigidbody
 /// Movimiento RELATIVO A LA CÁMARA (proyectado en plano XZ)
 /// W siempre aleja de cámara, S siempre acerca
+/// Controla un Animator en el hijo (frisk sprite) con un Blend 1D ("Blend")
 /// </summary>
 public class Mov_Player3D : MonoBehaviour
 {
     [Header("Configuración de Movimiento")]
-    [Tooltip("Velocidad de movimiento del jugador")]
     [SerializeField] private float velocidad = 5f;
 
     [Header("Configuración de Salto")]
@@ -21,13 +21,13 @@ public class Mov_Player3D : MonoBehaviour
     [SerializeField] private Transform checkSuelo;
     [SerializeField] private float radioCheckSuelo = 0.2f;
 
-    [Header("Animación (Opcional)")]
-    [SerializeField] private Animator animator;
+    [Header("Animación (en hijo)")]
+    [SerializeField] private Animator animator;   // Animator del frisk sprite
 
     [Header("Cámara")]
     private Camera camaraJuego;
 
-    // Variables privadas
+    // Privado
     private float movimientoHorizontal;
     private float movimientoVertical;
     private Vector3 direccionMovimiento;
@@ -36,33 +36,29 @@ public class Mov_Player3D : MonoBehaviour
 
     void Start()
     {
-        // Obtener Rigidbody
+        // Rigidbody
         rb = GetComponent<Rigidbody>();
         if (rb == null)
-        {
             rb = gameObject.AddComponent<Rigidbody>();
-        }
 
-        // Configurar Rigidbody para movimiento 2.5D con salto
         rb.constraints = RigidbodyConstraints.FreezeRotationX |
-                        RigidbodyConstraints.FreezeRotationZ;
-        rb.useGravity = true; // Activar gravedad para el salto
+                         RigidbodyConstraints.FreezeRotationZ;
+        rb.useGravity = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // Obtener cámara principal
+        // Cámara
         camaraJuego = Camera.main;
         if (camaraJuego == null)
-        {
             Debug.LogError("❌ No se encontró la cámara principal");
-        }
 
-        // Obtener animator si existe
+        // Animator (en el hijo)
         if (animator == null)
         {
-            animator = GetComponent<Animator>();
+            // Buscar en hijos (frisk sprite)
+            animator = GetComponentInChildren<Animator>();
         }
 
-        // Crear checkSuelo si no existe
+        // Check suelo
         if (checkSuelo == null)
         {
             GameObject check = new GameObject("CheckSuelo");
@@ -71,65 +67,68 @@ public class Mov_Player3D : MonoBehaviour
             checkSuelo = check.transform;
         }
 
-        Debug.Log("🎮 Mov_Player3D iniciado - Controles relativos a la cámara + Salto");
+        Debug.Log("🎮 Mov_Player3D iniciado (físicas en padre, animación en hijo)");
     }
 
     void Update()
     {
-        // Verificar si está en el suelo
+        // Suelo
         enSuelo = Physics.CheckSphere(checkSuelo.position, radioCheckSuelo, capaSuelo);
 
-        // Capturar input de movimiento
+        // Input
         movimientoHorizontal = Input.GetAxisRaw("Horizontal"); // A/D
-        movimientoVertical = Input.GetAxisRaw("Vertical");    // W/S
+        movimientoVertical = Input.GetAxisRaw("Vertical");   // W/S
 
         // Salto
         if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
-            Debug.Log("🎮 Jugador saltó");
         }
 
-        // Calcular dirección RELATIVA A LA CÁMARA (PROYECTADA EN PLANO XZ)
+        // Dirección relativa a la cámara
         if (camaraJuego != null)
         {
-            // Obtener forward de la cámara y proyectarlo en el plano XZ
             Vector3 camaraForward = camaraJuego.transform.forward;
-            camaraForward.y = 0; // Proyectar en plano horizontal
-            camaraForward.Normalize(); // Normalizar después de eliminar Y
+            camaraForward.y = 0;
+            camaraForward.Normalize();
 
-            // Obtener right de la cámara y proyectarlo en el plano XZ
             Vector3 camaraRight = camaraJuego.transform.right;
-            camaraRight.y = 0; // Proyectar en plano horizontal
-            camaraRight.Normalize(); // Normalizar después de eliminar Y
+            camaraRight.y = 0;
+            camaraRight.Normalize();
 
-            // Crear vector de movimiento relativo a la cámara
             direccionMovimiento = (camaraRight * movimientoHorizontal - camaraForward * movimientoVertical);
         }
         else
         {
-            // Fallback si no hay cámara
             direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
         }
 
-        // Normalizar para movimiento diagonal
         if (direccionMovimiento.magnitude > 1)
-        {
             direccionMovimiento.Normalize();
-        }
 
-        // Actualizar animaciones
+        // ANIMACIÓN SENCILLA CON BLEND 1D
         if (animator != null)
         {
-            animator.SetFloat("Velocidad", direccionMovimiento.magnitude);
-            animator.SetBool("EnSuelo", enSuelo);
+            float blendValue = 0f; // Idle por defecto
+
+            if (movimientoVertical > 0)          // W → Up
+                blendValue = 1f;
+            else if (movimientoVertical < 0)     // S → Down
+                blendValue = 0.25f;
+            else if (movimientoHorizontal > 0)   // D → Right
+                blendValue = 0.5f;
+            else if (movimientoHorizontal < 0)   // A → Left
+                blendValue = 0.75f;
+            else
+                blendValue = 0f;                 // Idle
+
+            animator.SetFloat("Blend", blendValue);
         }
     }
 
     void FixedUpdate()
     {
-        // Mover usando física (solo en XZ, mantener velocidad Y)
         Vector3 movimiento = direccionMovimiento * velocidad * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + movimiento);
     }
@@ -137,12 +136,9 @@ public class Mov_Player3D : MonoBehaviour
     void OnDisable()
     {
         if (rb != null)
-        {
             rb.linearVelocity = Vector3.zero;
-        }
     }
 
-    // Visualizar el check de suelo en el editor
     void OnDrawGizmosSelected()
     {
         if (checkSuelo != null)
@@ -152,16 +148,28 @@ public class Mov_Player3D : MonoBehaviour
         }
     }
 
+    // Para el GameplayManager (si lo usas)
     public void EstablecerDireccion(Vector3 nuevaDireccion)
     {
-        // La dirección viene ya calculada en el Manager, solo la usamos
         direccionMovimiento = nuevaDireccion;
 
-        // Actualizar animación si existe
         if (animator != null)
         {
-            animator.SetFloat("Velocidad", direccionMovimiento.magnitude);
+            // Convertimos la dirección en algo equivalente a las teclas, muy simple
+            float blendValue = 0f;
+
+            if (nuevaDireccion.z > 0.1f)
+                blendValue = 1f;          // Up
+            else if (nuevaDireccion.z < -0.1f)
+                blendValue = 0.25f;       // Down
+            else if (nuevaDireccion.x > 0.1f)
+                blendValue = 0.5f;        // Right
+            else if (nuevaDireccion.x < -0.1f)
+                blendValue = 0.75f;       // Left
+            else
+                blendValue = 0f;          // Idle
+
+            animator.SetFloat("Blend", blendValue);
         }
     }
-
 }
