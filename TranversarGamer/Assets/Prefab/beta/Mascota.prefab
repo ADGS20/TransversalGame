@@ -196,8 +196,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1, y: 1.0326538, z: 1}
+  m_Center: {x: 0, y: -0.016326904, z: 0}
 --- !u!114 &176512501841986580
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,6 +214,14 @@ MonoBehaviour:
   distanciaMinima: 0.5
   velocidadSeguimiento: 4
   velocidadMovimiento: 5
+  fuerzaSalto: 5
+  gravedadNormal: -9.81
+  gravedadPlaneo: -2
+  capaSuelo:
+    serializedVersion: 2
+    m_Bits: 0
+  checkSuelo: {fileID: 0}
+  radioCheckSuelo: 0.2
   anguloInclinacionX: 45
   mirarACamara: 1
   rotacionSuave: 0

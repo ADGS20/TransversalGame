@@ -865,7 +865,6 @@ MonoBehaviour:
   sliderAnimado: {fileID: 121179144}
   canvasEleccion: {fileID: 226962847}
   scriptMovimientoJugador: {fileID: 332338465}
-  shaderController: {fileID: 2076492390}
 --- !u!1 &260660833
 GameObject:
   m_ObjectHideFlags: 0
@@ -1151,8 +1150,8 @@ Transform:
   m_GameObject: {fileID: 280517026}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.474432, y: -1.5252051, z: -7.8665543}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -4.474432, y: -1.988, z: -7.8665543}
+  m_LocalScale: {x: 1, y: 0.852, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1308396250}
@@ -1368,6 +1367,10 @@ PrefabInstance:
     - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
       propertyPath: rotacionSuave
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
+      propertyPath: capaSuelo.m_Bits
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
       propertyPath: velocidadRotacion
@@ -1781,7 +1784,7 @@ GameObject:
   - component: {fileID: 550961909}
   - component: {fileID: 550961908}
   - component: {fileID: 550961907}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plane (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2804,6 +2807,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 176512501841986580, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
+      propertyPath: capaSuelo.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 176512501841986580, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: jugadorPrincipal
       value: 
       objectReference: {fileID: 332338463}
@@ -2832,6 +2839,10 @@ PrefabInstance:
       value: Mascota
       objectReference: {fileID: 0}
     - target: {fileID: 6343335262448562005, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.2196969
+      objectReference: {fileID: 0}
+    - target: {fileID: 6343335262448562005, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: m_LocalPosition.x
       value: -31.73
       objectReference: {fileID: 0}
@@ -2841,7 +2852,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6343335262448562005, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 6343335262448562005, guid: f5019be8a3727b24da9e5dae7ead2d34, type: 3}
       propertyPath: m_LocalRotation.w

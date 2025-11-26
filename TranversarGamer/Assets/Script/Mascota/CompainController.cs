@@ -5,7 +5,12 @@
 using UnityEngine;
 
 /// <summary>
-/// Control del compañero en 2.5D con movimiento físico y billboard
+/// Control del compañero en 2.5D:
+/// - Sigue al jugador cuando no es controlable
+/// - Se mueve con WASD cuando es controlable
+/// - Salta con Space
+/// - Planea si mantiene Space en el aire (cae lentamente)
+/// - Sprite billboard mirando a la cámara
 /// </summary>
 public class CompainController : MonoBehaviour
 {
@@ -17,18 +22,13 @@ public class CompainController : MonoBehaviour
     [Header("Movimiento Manual")]
     [SerializeField] private float velocidadMovimiento = 5f;
 
-    [Header("Correr (Manual y Seguimiento)")]
-    [Tooltip("¿Permitir correr con Shift cuando es controlable?")]
-    [SerializeField] private bool permitirCorrer = true;
-
-    [Tooltip("Multiplicador de velocidad al correr (cuando es controlable)")]
-    [SerializeField] private float multiplicadorCorrer = 1.6f;
-
-    [Tooltip("¿Acelerar cuando el jugador está corriendo mientras lo sigue?")]
-    [SerializeField] private bool seguirAcelerandoSiJugadorCorre = true;
-
-    [Tooltip("Multiplicador de velocidad al seguir si el jugador corre")]
-    [SerializeField] private float multiplicadorSeguirCuandoJugadorCorre = 1.3f;
+    [Header("Salto y Planeo")]
+    [SerializeField] private float fuerzaSalto = 5f;
+    [SerializeField] private float gravedadNormal = -9.81f;
+    [SerializeField] private float gravedadPlaneo = -2f;
+    [SerializeField] private LayerMask capaSuelo;
+    [SerializeField] private Transform checkSuelo;
+    [SerializeField] private float radioCheckSuelo = 0.2f;
 
     [Header("Sprite Billboard")]
     [SerializeField] private float anguloInclinacionX = 45f;
@@ -37,112 +37,143 @@ public class CompainController : MonoBehaviour
     [SerializeField] private float velocidadRotacion = 10f;
 
     [Header("Estado")]
+    [Tooltip("¿Está siendo controlado por el jugador?")]
     public bool esControlable = false;
 
     [Header("Animación")]
     [SerializeField] private Animator animator;
 
-    private CameraOrbital camaraOrbital;
+    // Privado
+    private float movimientoHorizontal;
+    private float movimientoVertical;
     private Vector3 direccionMovimiento;
     private Rigidbody rb;
     private Transform spriteTransform;
     private SpriteRenderer spriteRenderer;
     private Camera camaraJuego;
     private Collider colliderCompanero;
-    private float yawActual = 0f;
 
-    // Referencias opcionales para detectar si el jugador corre
-    [Header("Referencias (Opcional)")]
-    [Tooltip("Script de movimiento del jugador (si se asigna, se usará para detectar correr)")]
-    [SerializeField] private Mov_Player3D scriptJugador; // opcional
+    private bool enSuelo;
+    private bool estaPlanando = false;
+    private float velocidadVertical = 0f;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>() ?? gameObject.AddComponent<Rigidbody>();
+        // Rigidbody
+        rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+
+        // NO congelamos Y (porque debe saltar)
         rb.constraints = RigidbodyConstraints.FreezeRotationX |
-                         RigidbodyConstraints.FreezeRotationZ |
-                         RigidbodyConstraints.FreezePositionY;
-        rb.useGravity = false;
+                         RigidbodyConstraints.FreezeRotationY |
+                         RigidbodyConstraints.FreezeRotationZ;
+        rb.useGravity = false; // usamos gravedad personalizada
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
+        // Sprite
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        if (spriteRenderer != null) spriteTransform = spriteRenderer.transform;
+        if (spriteRenderer != null)
+            spriteTransform = spriteRenderer.transform;
 
+        // Cámara
         camaraJuego = Camera.main;
-        if (camaraJuego != null)
-        {
-            camaraOrbital = camaraJuego.GetComponent<CameraOrbital>();
-        }
 
+        // Jugador
         if (jugadorPrincipal == null)
         {
             GameObject jugador = GameObject.FindGameObjectWithTag("Player");
             if (jugador != null) jugadorPrincipal = jugador.transform;
         }
 
-        if (scriptJugador == null && jugadorPrincipal != null)
-        {
-            scriptJugador = jugadorPrincipal.GetComponent<Mov_Player3D>();
-        }
+        // Animator
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
 
-        if (animator == null) animator = GetComponentInChildren<Animator>();
-
+        // Collider
         colliderCompanero = GetComponent<Collider>();
-        if (colliderCompanero != null) colliderCompanero.isTrigger = true;
+        if (colliderCompanero != null)
+            colliderCompanero.isTrigger = true; // modo seguimiento por defecto
 
-        yawActual = transform.eulerAngles.y;
-        if (camaraOrbital != null) yawActual = camaraOrbital.ObtenerAnguloActual();
+        // Check suelo auto si no se asigna
+        if (checkSuelo == null)
+        {
+            GameObject check = new GameObject("CheckSuelo_Companero");
+            check.transform.SetParent(transform);
+            check.transform.localPosition = new Vector3(0, -0.5f, 0);
+            checkSuelo = check.transform;
+        }
     }
 
     void Update()
     {
-        if (!esControlable)
+        // Comprobar suelo
+        enSuelo = Physics.CheckSphere(checkSuelo.position, radioCheckSuelo, capaSuelo);
+
+        if (esControlable)
+        {
+            CapturarInputManual();
+
+            // Salto
+            if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
+            {
+                velocidadVertical = fuerzaSalto;
+                estaPlanando = false;
+                Debug.Log("🐾 Compañero saltó");
+            }
+
+            // Planeo (mantener Space en el aire mientras cae)
+            if (Input.GetKey(KeyCode.Space) && !enSuelo && velocidadVertical < 0)
+            {
+                estaPlanando = true;
+            }
+            else if (!Input.GetKey(KeyCode.Space))
+            {
+                estaPlanando = false;
+            }
+        }
+        else
         {
             CalcularSeguimiento();
+            estaPlanando = false;
         }
 
+        // Sprite billboard
         if (spriteTransform != null && camaraJuego != null)
-        {
             ActualizarOrientacionSprite();
-        }
 
+        // Flip
         ActualizarFlipSprite();
 
+        // Animaciones
         if (animator != null)
         {
-            float speedFactor = esControlable
-                ? ObtenerFactorCorrerManual()
-                : ObtenerFactorSeguirCuandoJugadorCorre();
-
-            animator.SetFloat("Velocidad", direccionMovimiento.magnitude * speedFactor);
-            animator.SetBool("Corriendo", esControlable ? (permitirCorrer && EstaCorriendo()) :
-                                   (seguirAcelerandoSiJugadorCorre && JugadorEstaCorriendo()));
-        }
-
-        if (camaraOrbital != null)
-        {
-            yawActual = camaraOrbital.ObtenerAnguloActual();
+            animator.SetFloat("Velocidad", direccionMovimiento.magnitude);
+            animator.SetBool("EnSuelo", enSuelo);
+            animator.SetBool("Planando", estaPlanando);
         }
     }
 
     void FixedUpdate()
     {
-        float speed = esControlable
-            ? velocidadMovimiento * ObtenerFactorCorrerManual()
-            : velocidadSeguimiento * ObtenerFactorSeguirCuandoJugadorCorre();
-
-        if (direccionMovimiento != Vector3.zero)
+        // Gravedad personalizada
+        if (!enSuelo)
         {
-            Vector3 nuevaPosicion = rb.position + direccionMovimiento * speed * Time.fixedDeltaTime;
-            rb.MovePosition(nuevaPosicion);
+            float g = estaPlanando ? gravedadPlaneo : gravedadNormal;
+            velocidadVertical += g * Time.fixedDeltaTime;
         }
         else
         {
-            rb.linearVelocity = Vector3.zero;
+            if (velocidadVertical < 0f) velocidadVertical = 0f;
         }
 
-        Quaternion rotacionObjetivo = Quaternion.Euler(0, yawActual, 0);
-        rb.MoveRotation(rotacionObjetivo);
+        // Movimiento XZ
+        float velocidadActual = esControlable ? velocidadMovimiento : velocidadSeguimiento;
+        Vector3 movimientoXZ = direccionMovimiento * velocidadActual * Time.fixedDeltaTime;
+
+        // Movimiento Y
+        Vector3 movimientoY = Vector3.up * velocidadVertical * Time.fixedDeltaTime;
+
+        rb.MovePosition(rb.position + movimientoXZ + movimientoY);
     }
 
     private void CalcularSeguimiento()
@@ -153,33 +184,40 @@ public class CompainController : MonoBehaviour
         float distancia = Vector3.Distance(transform.position, posJugador);
 
         if (distancia > distanciaMinima)
-        {
             direccionMovimiento = (posJugador - transform.position).normalized;
-        }
         else
-        {
             direccionMovimiento = Vector3.zero;
-        }
+    }
+
+    private void CapturarInputManual()
+    {
+        movimientoHorizontal = Input.GetAxisRaw("Horizontal");
+        movimientoVertical = Input.GetAxisRaw("Vertical");
+
+        direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
+
+        if (direccionMovimiento.magnitude > 1f)
+            direccionMovimiento.Normalize();
     }
 
     private void ActualizarOrientacionSprite()
     {
-        if (mirarACamara)
-        {
-            Vector3 direccionACamara = camaraJuego.transform.position - spriteTransform.position;
-            direccionACamara.y = 0;
-
-            Quaternion rotacionHaciaCamera = Quaternion.LookRotation(direccionACamara);
-            Quaternion rotacionFinal = rotacionHaciaCamera * Quaternion.Euler(anguloInclinacionX, 0, 0);
-
-            spriteTransform.rotation = rotacionSuave
-                ? Quaternion.Slerp(spriteTransform.rotation, rotacionFinal, velocidadRotacion * Time.deltaTime)
-                : rotacionFinal;
-        }
-        else
+        if (!mirarACamara)
         {
             spriteTransform.localRotation = Quaternion.Euler(anguloInclinacionX, 0, 0);
+            return;
         }
+
+        Vector3 dirCam = camaraJuego.transform.position - spriteTransform.position;
+        dirCam.y = 0;
+
+        Quaternion rotCam = Quaternion.LookRotation(dirCam);
+        Quaternion rotFinal = rotCam * Quaternion.Euler(anguloInclinacionX, 0, 0);
+
+        if (rotacionSuave)
+            spriteTransform.rotation = Quaternion.Slerp(spriteTransform.rotation, rotFinal, velocidadRotacion * Time.deltaTime);
+        else
+            spriteTransform.rotation = rotFinal;
     }
 
     private void ActualizarFlipSprite()
@@ -188,31 +226,42 @@ public class CompainController : MonoBehaviour
 
         if (esControlable)
         {
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            if (horizontal > 0) spriteRenderer.flipX = true;
-            else if (horizontal < 0) spriteRenderer.flipX = false;
+            if (movimientoHorizontal > 0)
+                spriteRenderer.flipX = true;
+            else if (movimientoHorizontal < 0)
+                spriteRenderer.flipX = false;
         }
         else
         {
             if (jugadorPrincipal == null) return;
-            float diferenciaX = transform.position.x - jugadorPrincipal.position.x;
-            spriteRenderer.flipX = (diferenciaX < 0);
+
+            float difX = transform.position.x - jugadorPrincipal.position.x;
+            spriteRenderer.flipX = difX < 0;
         }
     }
 
     public void ActivarControl()
     {
         esControlable = true;
-        if (colliderCompanero != null) colliderCompanero.isTrigger = false;
+        if (colliderCompanero != null)
+            colliderCompanero.isTrigger = false;
+        Debug.Log("🐾 Compañero activado");
     }
 
     public void DesactivarControl()
     {
         esControlable = false;
-        if (rb != null) rb.linearVelocity = Vector3.zero;
         direccionMovimiento = Vector3.zero;
-        if (colliderCompanero != null) colliderCompanero.isTrigger = true;
-        if (animator != null) animator.SetBool("Corriendo", false);
+        velocidadVertical = 0f;
+        estaPlanando = false;
+
+        if (rb != null)
+            rb.linearVelocity = Vector3.zero;
+
+        if (colliderCompanero != null)
+            colliderCompanero.isTrigger = true;
+
+        Debug.Log("👤 Compañero desactivado");
     }
 
     public void CambiarAnguloInclinacion(float nuevoAngulo)
@@ -220,44 +269,24 @@ public class CompainController : MonoBehaviour
         anguloInclinacionX = nuevoAngulo;
     }
 
-    /// <summary>
-    /// Establece la dirección de movimiento (llamado desde GameplayManager)
-    /// </summary>
-    public void EstablecerDireccion(Vector3 direccion)
+    // Para que veas el check de suelo
+    private void OnDrawGizmosSelected()
     {
-        direccionMovimiento = direccion;
-    }
-
-    // ——— Correr (Manual) ———
-    private bool EstaCorriendo()
-    {
-        return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-    }
-
-    private float ObtenerFactorCorrerManual()
-    {
-        if (!permitirCorrer) return 1f;
-        return EstaCorriendo() ? multiplicadorCorrer : 1f;
-    }
-
-    // ——— Correr (Seguimiento del jugador) ———
-    private bool JugadorEstaCorriendo()
-    {
-        // Si tenemos referencia a scriptJugador, usamos la misma detección
-        if (scriptJugador != null)
+        if (checkSuelo != null)
         {
-            // No tiene un getter público; usamos input como fallback
-            // Si prefieres, podemos exponer un método en Mov_Player3D para saber si corre.
-            return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            Gizmos.color = enSuelo ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(checkSuelo.position, radioCheckSuelo);
         }
-
-        // Fallback: detectar Shift globalmente
-        return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
     }
 
-    private float ObtenerFactorSeguirCuandoJugadorCorre()
+    // Para el GameplayManager
+    public void EstablecerDireccion(Vector3 nuevaDireccion)
     {
-        if (!seguirAcelerandoSiJugadorCorre) return 1f;
-        return JugadorEstaCorriendo() ? multiplicadorSeguirCuandoJugadorCorre : 1f;
+        if (esControlable)
+        {
+            direccionMovimiento = nuevaDireccion;
+            if (direccionMovimiento.magnitude > 1f)
+                direccionMovimiento.Normalize();
+        }
     }
 }
