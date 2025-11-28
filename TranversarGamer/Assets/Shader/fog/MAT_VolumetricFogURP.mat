@@ -38,17 +38,17 @@ Material:
     m_Ints: []
     m_Floats:
     - _DensityMultiplier: 0.05
-    - _FogBrightness: 1.5
-    - _FogDensity: 0.1
+    - _FogBrightness: 3
+    - _FogDensity: 0.22
     - _FogHeight: 0.1
     - _FogHeightFalloff: 0.1
-    - _FogSoftness: 0.7
-    - _Jitter: 0.3
-    - _MaxDistance: 0.25
+    - _FogSoftness: 2
+    - _Jitter: 1
+    - _MaxDistance: 0.18
     - _NoiseOffset: 0.5
     - _NoiseScale: 0.1
     - _NoiseThreshold: 0.5
-    - _NumSteps: 48
+    - _NumSteps: 128
     - _PhaseG: 0.5
     - _StepSize: 0.5
     m_Colors:
