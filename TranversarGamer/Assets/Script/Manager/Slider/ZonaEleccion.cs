@@ -1,3 +1,7 @@
+//---------------Creador de este script-------------------------//
+//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
+//-------------------------------------------------------------//
+
 using UnityEngine;
 
 public class ZonaEleccion : MonoBehaviour
@@ -6,10 +10,9 @@ public class ZonaEleccion : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player")) // Asegúrate de que el jugador tenga el tag "Player"
+        if (other.CompareTag("Player"))
         {
             canvasEleccion.SetActive(true);
-            // Opcional: pausa el movimiento del jugador aquí si quieres
         }
     }
 }

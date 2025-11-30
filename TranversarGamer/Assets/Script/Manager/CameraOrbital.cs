@@ -4,18 +4,24 @@
 
 using UnityEngine;
 
-/// Cámara orbital con rotación en pasos (E/Q) y zoom en riel Y + distancia en plano,
-/// sin interferir con la rotación/movimiento físico de los personajes.
+/// Cámara orbital con rotación en pasos (E/Q o LB/RB) y zoom en riel Y + distancia en plano,
+/// con soporte para teclado/ratón Y mando (Both), sin interferir con la rotación/movimiento físico de los personajes.
 public class CameraOrbital : MonoBehaviour
 {
     [Header("Seguimiento")]
     [SerializeField] private float velocidadSeguimiento = 10f;
     [SerializeField] private bool usarSuavizado = true;
 
-    [Header("Rotación (90°)")]
+    [Header("Rotación Teclado (90° pasos)")]
     [SerializeField] private KeyCode teclaRotarDerecha = KeyCode.E;
     [SerializeField] private KeyCode teclaRotarIzquierda = KeyCode.Q;
     [SerializeField] private float velocidadRotacion = 10f;
+
+    [Header("Rotación Mando (botones LB / RB)")]
+    [Tooltip("Botón para rotar a la derecha (RB)")]
+    [SerializeField] private KeyCode botonRotarDerechaMando = KeyCode.JoystickButton5; // RB en muchos mandos Xbox
+    [Tooltip("Botón para rotar a la izquierda (LB)")]
+    [SerializeField] private KeyCode botonRotarIzquierdaMando = KeyCode.JoystickButton4; // LB en muchos mandos Xbox
 
     [Header("Zoom (riel)")]
     [Tooltip("Altura mínima (más cerca)")]
@@ -24,18 +30,25 @@ public class CameraOrbital : MonoBehaviour
     [SerializeField] private float yLejos = 6.0f;
 
     [Tooltip("Distancia en plano mínima (más cerca). Usa valores positivos")]
-    [SerializeField] private float planoCerca = 3.64f; // equivalente a |Z| 3.64
+    [SerializeField] private float planoCerca = 3.64f;
     [Tooltip("Distancia en plano máxima (más lejos). Usa valores positivos")]
-    [SerializeField] private float planoLejos = 11.0f; // equivalente a |Z| 11
+    [SerializeField] private float planoLejos = 11.0f;
 
     [Tooltip("Factor de zoom inicial (0 = lejos, 1 = cerca)")]
     [Range(0f, 1f)]
     [SerializeField] private float zoomFactorInicial = 0.5f;
 
+    [Header("Zoom Teclado/Ratón")]
     [SerializeField] private float velocidadZoom = 1.5f;
     [SerializeField] private float suavizadoZoom = 10f;
     [SerializeField] private KeyCode teclaAcercar = KeyCode.Z;
     [SerializeField] private KeyCode teclaAlejar = KeyCode.X;
+
+    [Header("Zoom Mando (stick derecho vertical)")]
+    [Tooltip("Nombre del eje vertical del stick derecho (Input Manager)")]
+    [SerializeField] private string ejeStickDerechoVertical = "RightStickVertical";
+    [SerializeField] private float velocidadZoomMando = 1.0f;
+    [SerializeField] private float deadzoneStick = 0.2f;
 
     private Transform objetivo;
 
@@ -51,16 +64,24 @@ public class CameraOrbital : MonoBehaviour
     private float zoomFactorObjetivo;
     private float zoomFactorActual;
 
+    // Flag para saber si el eje del stick está configurado
+    private bool tieneStickDerechoVertical = false;
+
     void Start()
     {
         zoomFactorObjetivo = zoomFactorActual = Mathf.Clamp01(zoomFactorInicial);
+
+        // Detectar si el eje del stick derecho vertical existe
+        tieneStickDerechoVertical = ComprobarEje(ejeStickDerechoVertical);
+        if (!tieneStickDerechoVertical)
+            Debug.LogWarning($"CameraOrbital: Eje '{ejeStickDerechoVertical}' no configurado. Zoom con mando deshabilitado.");
     }
 
     void Update()
     {
         if (objetivo == null) return;
 
-        DetectarRotacion();
+        DetectarRotacionTecladoYMando();
         DetectarZoom();
 
         // Suavizar target
@@ -84,14 +105,33 @@ public class CameraOrbital : MonoBehaviour
         }
     }
 
-    private void DetectarRotacion()
+    private void DetectarRotacionTecladoYMando()
     {
         if (estaRotando) return;
 
+        // Teclado
         if (Input.GetKeyDown(teclaRotarDerecha))
+        {
             SetRotacionObjetivo(anguloObjetivo + 90f);
-        else if (Input.GetKeyDown(teclaRotarIzquierda))
+            return;
+        }
+        if (Input.GetKeyDown(teclaRotarIzquierda))
+        {
             SetRotacionObjetivo(anguloObjetivo - 90f);
+            return;
+        }
+
+        // Mando: RB / LB
+        if (Input.GetKeyDown(botonRotarDerechaMando))
+        {
+            SetRotacionObjetivo(anguloObjetivo + 90f);
+            return;
+        }
+        if (Input.GetKeyDown(botonRotarIzquierdaMando))
+        {
+            SetRotacionObjetivo(anguloObjetivo - 90f);
+            return;
+        }
     }
 
     private void SetRotacionObjetivo(float deg)
@@ -102,15 +142,23 @@ public class CameraOrbital : MonoBehaviour
 
     private void DetectarZoom()
     {
+        // ---- TECLADO/RATÓN ----
         // Rueda del ratón: + acercar, - alejar
         float scroll = Input.mouseScrollDelta.y;
         if (Mathf.Abs(scroll) > 0.01f)
             zoomFactorObjetivo += scroll * (velocidadZoom * 0.1f);
 
-        if (Input.GetKey(teclaAcercar))
-            zoomFactorObjetivo += velocidadZoom * Time.deltaTime;
-        if (Input.GetKey(teclaAlejar))
-            zoomFactorObjetivo -= velocidadZoom * Time.deltaTime;
+
+        // ---- MANDO: STICK DERECHO VERTICAL ----
+        if (tieneStickDerechoVertical)
+        {
+            float padY = ObtenerEje(ejeStickDerechoVertical); // arriba/abajo en el stick
+
+            if (Mathf.Abs(padY) > deadzoneStick)
+            {
+                zoomFactorObjetivo += padY * velocidadZoomMando * Time.deltaTime;
+            }
+        }
 
         zoomFactorObjetivo = Mathf.Clamp01(zoomFactorObjetivo);
     }
@@ -122,13 +170,10 @@ public class CameraOrbital : MonoBehaviour
         float plano = Mathf.Lerp(planoLejos, planoCerca, zoomFactorActual); // positivo
 
         // Calcular forward plano a partir del yaw interno (sin tocar transforms externos)
-        // Nuestro sistema previo usa anguloActual=0 alineado con Y=0 mirando +Z (corregido en versiones previas).
         float yawRad = (anguloActual) * Mathf.Deg2Rad;
         Vector3 forwardPlano = new Vector3(Mathf.Sin(yawRad), 0, Mathf.Cos(yawRad)); // normalizado
-        Vector3 rightPlano = new Vector3(Mathf.Cos(yawRad), 0, -Mathf.Sin(yawRad));  // por si se necesita
 
         // Offset: nos colocamos "plano" unidades detrás del objetivo respecto a su forward (alejado de él)
-        // Detrás = -forwardPlano
         Vector3 offsetPlano = -forwardPlano * plano;
 
         // Posición final: riel Y y desplazamiento en plano con el yaw actual
@@ -150,7 +195,33 @@ public class CameraOrbital : MonoBehaviour
         return angulo;
     }
 
-    // API pública
+    // ---- HELPERS PARA EJES DEL MANDO ----
+    private bool ComprobarEje(string nombreEje)
+    {
+        try
+        {
+            Input.GetAxis(nombreEje);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private float ObtenerEje(string nombreEje)
+    {
+        try
+        {
+            return Input.GetAxis(nombreEje);
+        }
+        catch
+        {
+            return 0f;
+        }
+    }
+
+    // ---- API PÚBLICA (para GameplayManager, ObjetoAlineadoCamara, etc.) ----
     public void CambiarObjetivo(Transform nuevoObjetivo)
     {
         objetivo = nuevoObjetivo;

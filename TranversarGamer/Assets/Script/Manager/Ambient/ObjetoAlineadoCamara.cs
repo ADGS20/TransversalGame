@@ -14,7 +14,7 @@ public class ObjetoAlineadoCamara : MonoBehaviour
         // Si no se asignó manualmente, busca automáticamente
         if (camaraOrbital == null)
         {
-            camaraOrbital = FindObjectOfType<CameraOrbital>();
+            camaraOrbital = Object.FindFirstObjectByType<CameraOrbital>();
 
             if (camaraOrbital == null)
             {

@@ -6,10 +6,10 @@ using UnityEngine;
 
 /// <summary>
 /// Control del compañero en 2.5D:
-/// - Sigue al jugador cuando no es controlable
-/// - Se mueve con WASD cuando es controlable
-/// - Salta con Space
-/// - Planea si mantiene Space en el aire (cae lentamente)
+/// - Sigue al jugador cuando seguimientoActivo = true y no es controlable
+/// - Se mueve con WASD / stick izquierdo relativo a la cámara cuando es controlable
+/// - Salta con Space / botón A
+/// - Planea si mantiene el botón de saltar en el aire (cae lentamente)
 /// - Sprite billboard mirando a la cámara
 /// </summary>
 public class CompainController : MonoBehaviour
@@ -23,15 +23,15 @@ public class CompainController : MonoBehaviour
     [SerializeField] private float velocidadMovimiento = 5f;
 
     [Header("Salto y Planeo")]
-    [SerializeField] private float fuerzaSalto = 5f;
-    [SerializeField] private float gravedadNormal = -9.81f;
-    [SerializeField] private float gravedadPlaneo = -2f;
+    [SerializeField] private float fuerzaSalto = 7f;
+    [SerializeField] private float gravedadNormal = -20f;
+    [SerializeField] private float gravedadPlaneo = -5f;
     [SerializeField] private LayerMask capaSuelo;
     [SerializeField] private Transform checkSuelo;
     [SerializeField] private float radioCheckSuelo = 0.2f;
 
     [Header("Sprite Billboard")]
-    [SerializeField] private float anguloInclinacionX = 45f;
+    [SerializeField] private float anguloInclinacionX = 30f;
     [SerializeField] private bool mirarACamara = true;
     [SerializeField] private bool rotacionSuave = false;
     [SerializeField] private float velocidadRotacion = 10f;
@@ -39,6 +39,9 @@ public class CompainController : MonoBehaviour
     [Header("Estado")]
     [Tooltip("¿Está siendo controlado por el jugador?")]
     public bool esControlable = false;
+
+    [Tooltip("¿Debe seguir automáticamente al jugador cuando no es controlable?")]
+    public bool seguimientoActivo = true;
 
     [Header("Animación")]
     [SerializeField] private Animator animator;
@@ -63,7 +66,6 @@ public class CompainController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
 
-        // NO congelamos Y (porque debe saltar)
         rb.constraints = RigidbodyConstraints.FreezeRotationX |
                          RigidbodyConstraints.FreezeRotationY |
                          RigidbodyConstraints.FreezeRotationZ;
@@ -112,28 +114,41 @@ public class CompainController : MonoBehaviour
         if (esControlable)
         {
             CapturarInputManual();
+            AplicarMovimientoRelativoACamara();
 
-            // Salto
-            if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
+            // --- LECTURA BOTÓN DE SALTO (teclado + mando) ---
+            bool saltoDown = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0);   // A (Xbox)
+            bool saltoHold = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.JoystickButton0);
+
+            // Salto inicial
+            if (saltoDown && enSuelo)
             {
                 velocidadVertical = fuerzaSalto;
                 estaPlanando = false;
-                Debug.Log("🐾 Compañero saltó");
             }
 
-            // Planeo (mantener Space en el aire mientras cae)
-            if (Input.GetKey(KeyCode.Space) && !enSuelo && velocidadVertical < 0)
+            // Planeo (mantener botón mientras cae)
+            if (saltoHold && !enSuelo && velocidadVertical < 0)
             {
                 estaPlanando = true;
             }
-            else if (!Input.GetKey(KeyCode.Space))
+            else if (!saltoHold)
             {
                 estaPlanando = false;
             }
         }
         else
         {
-            CalcularSeguimiento();
+            // Cuando no es controlable:
+            if (seguimientoActivo)
+            {
+                CalcularSeguimientoAutomatico(); // sigue al jugador
+            }
+            else
+            {
+                direccionMovimiento = Vector3.zero; // se queda quieto
+            }
+
             estaPlanando = false;
         }
 
@@ -176,7 +191,10 @@ public class CompainController : MonoBehaviour
         rb.MovePosition(rb.position + movimientoXZ + movimientoY);
     }
 
-    private void CalcularSeguimiento()
+    /// <summary>
+    /// Seguimiento automático en plano XZ hacia el jugador.
+    /// </summary>
+    private void CalcularSeguimientoAutomatico()
     {
         if (jugadorPrincipal == null) return;
 
@@ -189,12 +207,37 @@ public class CompainController : MonoBehaviour
             direccionMovimiento = Vector3.zero;
     }
 
+    /// <summary>
+    /// Lee input de WASD / stick izquierdo (ejes Horizontal/Vertical).
+    /// </summary>
     private void CapturarInputManual()
     {
         movimientoHorizontal = Input.GetAxisRaw("Horizontal");
         movimientoVertical = Input.GetAxisRaw("Vertical");
+    }
 
-        direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
+    /// <summary>
+    /// Convierte el input en un vector relativo a la cámara (igual que el jugador).
+    /// </summary>
+    private void AplicarMovimientoRelativoACamara()
+    {
+        if (camaraJuego != null)
+        {
+            Vector3 camaraForward = camaraJuego.transform.forward;
+            camaraForward.y = 0;
+            camaraForward.Normalize();
+
+            Vector3 camaraRight = camaraJuego.transform.right;
+            camaraRight.y = 0;
+            camaraRight.Normalize();
+
+            // W ALEJA de la cámara, S ACERCA
+            direccionMovimiento = (camaraRight * movimientoHorizontal + camaraForward * movimientoVertical);
+        }
+        else
+        {
+            direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
+        }
 
         if (direccionMovimiento.magnitude > 1f)
             direccionMovimiento.Normalize();
@@ -243,9 +286,12 @@ public class CompainController : MonoBehaviour
     public void ActivarControl()
     {
         esControlable = true;
+        seguimientoActivo = false; // cuando tomas el control, dejas de seguir
+
         if (colliderCompanero != null)
             colliderCompanero.isTrigger = false;
-        Debug.Log("🐾 Compañero activado");
+
+        velocidadVertical = 0f;
     }
 
     public void DesactivarControl()
@@ -261,7 +307,21 @@ public class CompainController : MonoBehaviour
         if (colliderCompanero != null)
             colliderCompanero.isTrigger = true;
 
-        Debug.Log("👤 Compañero desactivado");
+        // NO activamos seguimiento aquí: se queda en el sitio hasta que el jugador pulse X (GameplayManager → ActivarSeguimiento)
+    }
+
+    /// <summary>
+    /// Activa el seguimiento automático al jugador (llamado cuando jugador pulsa X).
+    /// </summary>
+    public void ActivarSeguimiento()
+    {
+        seguimientoActivo = true;
+    }
+
+    public void DesactivarSeguimiento()
+    {
+        seguimientoActivo = false;
+        direccionMovimiento = Vector3.zero;
     }
 
     public void CambiarAnguloInclinacion(float nuevoAngulo)
@@ -279,7 +339,7 @@ public class CompainController : MonoBehaviour
         }
     }
 
-    // Para el GameplayManager
+    // Para el GameplayManager (si algún día lo usas)
     public void EstablecerDireccion(Vector3 nuevaDireccion)
     {
         if (esControlable)

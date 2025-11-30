@@ -1,17 +1,15 @@
-//----Creador de este script----//
+//------------Creador de este script------------//
 //---- Hecho por: Andres Diaz Guerrero Soto ----//
-//----//
+//----------------------------------------------//
 
 using UnityEngine;
 
-/// <summary>
-/// Script de movimiento para jugador en 2.5D usando Rigidbody
-/// Movimiento RELATIVO A LA CÁMARA (proyectado en plano XZ)
-/// W siempre aleja de cámara, S siempre acerca
-/// Controla un Animator en el hijo (frisk sprite) con un Blend 1D ("Blend")
-/// </summary>
 public class Mov_Player3D : MonoBehaviour
 {
+    [Header("Input Handler (opcional)")]
+    [Tooltip("Si existe, usará InputActions (teclado + mando). Si es null, usa Input.GetAxis.")]
+    public InputHandler input;  // Referencia al InputHandler
+
     [Header("Configuración de Movimiento")]
     [SerializeField] private float velocidad = 5f;
 
@@ -24,10 +22,10 @@ public class Mov_Player3D : MonoBehaviour
     [Header("Animación (en hijo)")]
     [SerializeField] private Animator animator;   // Animator del frisk sprite
 
-    [Header("Cámara")]
-    private Camera camaraJuego;
+    [Header("Estado de control")]
+    [HideInInspector] public bool controlesBloqueados = false;
 
-    // Privado
+    private Camera camaraJuego;
     private float movimientoHorizontal;
     private float movimientoVertical;
     private Vector3 direccionMovimiento;
@@ -36,7 +34,6 @@ public class Mov_Player3D : MonoBehaviour
 
     void Start()
     {
-        // Rigidbody
         rb = GetComponent<Rigidbody>();
         if (rb == null)
             rb = gameObject.AddComponent<Rigidbody>();
@@ -46,28 +43,22 @@ public class Mov_Player3D : MonoBehaviour
         rb.useGravity = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // Cámara
-        camaraJuego = Camera.main;
-        if (camaraJuego == null)
-            Debug.LogError("❌ No se encontró la cámara principal");
+        camaraJuego = Camera.main; // La MainCamera tiene el CameraOrbital
 
-        // Animator (en el hijo)
         if (animator == null)
-        {
-            // Buscar en hijos (frisk sprite)
             animator = GetComponentInChildren<Animator>();
-        }
 
-        // Check suelo
         if (checkSuelo == null)
         {
             GameObject check = new GameObject("CheckSuelo");
             check.transform.SetParent(transform);
-            check.transform.localPosition = new Vector3(0, -0.5f, 0);
             checkSuelo = check.transform;
+            checkSuelo.localPosition = new Vector3(0, -0.5f, 0);
         }
 
-        Debug.Log("🎮 Mov_Player3D iniciado (físicas en padre, animación en hijo)");
+        // Buscar InputHandler si no está asignado
+        if (input == null)
+            input = FindObjectOfType<InputHandler>();
     }
 
     void Update()
@@ -75,20 +66,42 @@ public class Mov_Player3D : MonoBehaviour
         // Suelo
         enSuelo = Physics.CheckSphere(checkSuelo.position, radioCheckSuelo, capaSuelo);
 
-        // Input
-        movimientoHorizontal = Input.GetAxisRaw("Horizontal"); // A/D
-        movimientoVertical = Input.GetAxisRaw("Vertical");   // W/S
+        // ---- LEER INPUT ----
+        Vector2 mov = Vector2.zero;
+        bool salto = false;
+
+        if (!controlesBloqueados)
+        {
+            if (input != null)
+            {
+                // Nuevo Input System: teclado + mando a la vez
+                mov = input.Movimiento;
+                salto = input.Saltar;
+            }
+            else
+            {
+                // Fallback: sistema clásico (por si el InputHandler no está en escena)
+                mov.x = Input.GetAxisRaw("Horizontal");
+                mov.y = Input.GetAxisRaw("Vertical");
+                salto = Input.GetButtonDown("Jump");
+            }
+        }
+
+        // Asignar a nuestras variables
+        movimientoHorizontal = mov.x;
+        movimientoVertical = mov.y;
 
         // Salto
-        if (Input.GetKeyDown(KeyCode.Space) && enSuelo)
+        if (!controlesBloqueados && salto && enSuelo)
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
         }
 
-        // Dirección relativa a la cámara
+        // ---- DIRECCIÓN RELATIVA A LA CÁMARA ----
         if (camaraJuego != null)
         {
+            // Usamos la dirección de la cámara actual (que ya rota con CameraOrbital)
             Vector3 camaraForward = camaraJuego.transform.forward;
             camaraForward.y = 0;
             camaraForward.Normalize();
@@ -97,31 +110,40 @@ public class Mov_Player3D : MonoBehaviour
             camaraRight.y = 0;
             camaraRight.Normalize();
 
-            direccionMovimiento = (camaraRight * movimientoHorizontal - camaraForward * movimientoVertical);
+            // W ALEJA de la cámara, S ACERCA
+            direccionMovimiento = (camaraRight * movimientoHorizontal + camaraForward * movimientoVertical);
         }
         else
         {
             direccionMovimiento = new Vector3(movimientoHorizontal, 0, movimientoVertical);
         }
 
-        if (direccionMovimiento.magnitude > 1)
+        if (direccionMovimiento.magnitude > 1f)
             direccionMovimiento.Normalize();
 
-        // ANIMACIÓN SENCILLA CON BLEND 1D
+        // ---- ANIMACIÓN: Blend 1D según WASD ----
         if (animator != null)
         {
-            float blendValue = 0f; // Idle por defecto
+            float blendValue = 0f; // Idle
 
-            if (movimientoVertical > 0)          // W → Up
-                blendValue = 1f;
-            else if (movimientoVertical < 0)     // S → Down
-                blendValue = 0.25f;
-            else if (movimientoHorizontal > 0)   // D → Right
-                blendValue = 0.5f;
-            else if (movimientoHorizontal < 0)   // A → Left
-                blendValue = 0.75f;
+            if (Mathf.Abs(movimientoVertical) > 0.1f)
+            {
+                if (movimientoVertical > 0)      // W = alejar de cámara
+                    blendValue = 1f;             // Walk Up
+                else                              // S = acercar a cámara
+                    blendValue = 0.25f;          // Walk Down
+            }
+            else if (Mathf.Abs(movimientoHorizontal) > 0.1f)
+            {
+                if (movimientoHorizontal > 0)    // D = derecha pantalla
+                    blendValue = 0.5f;           // Walk Right
+                else                             // A = izquierda pantalla
+                    blendValue = 0.75f;          // Walk Left
+            }
             else
+            {
                 blendValue = 0f;                 // Idle
+            }
 
             animator.SetFloat("Blend", blendValue);
         }
@@ -148,28 +170,21 @@ public class Mov_Player3D : MonoBehaviour
         }
     }
 
-    // Para el GameplayManager (si lo usas)
     public void EstablecerDireccion(Vector3 nuevaDireccion)
     {
         direccionMovimiento = nuevaDireccion;
+    }
+
+    public void ForzarIdle()
+    {
+        movimientoHorizontal = 0f;
+        movimientoVertical = 0f;
+        direccionMovimiento = Vector3.zero;
+
+        if (rb != null)
+            rb.linearVelocity = Vector3.zero;
 
         if (animator != null)
-        {
-            // Convertimos la dirección en algo equivalente a las teclas, muy simple
-            float blendValue = 0f;
-
-            if (nuevaDireccion.z > 0.1f)
-                blendValue = 1f;          // Up
-            else if (nuevaDireccion.z < -0.1f)
-                blendValue = 0.25f;       // Down
-            else if (nuevaDireccion.x > 0.1f)
-                blendValue = 0.5f;        // Right
-            else if (nuevaDireccion.x < -0.1f)
-                blendValue = 0.75f;       // Left
-            else
-                blendValue = 0f;          // Idle
-
-            animator.SetFloat("Blend", blendValue);
-        }
+            animator.SetFloat("Blend", 0f); // Idle
     }
 }

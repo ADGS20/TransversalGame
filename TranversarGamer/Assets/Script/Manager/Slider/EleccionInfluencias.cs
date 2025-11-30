@@ -2,40 +2,101 @@
 //--------- Hecho por: Andres Diaz Guerrero Soto --------------//
 //-------------------------------------------------------------//
 
-
 using UnityEngine;
-using UnityEngine.UI;
 
 public class EleccionInfluencias : MonoBehaviour
 {
     public SliderAnimado sliderAnimado;
     public GameObject canvasEleccion;
-    public Mov_Player3D scriptMovimientoJugador;
-   
+
+    [Header("Control (se asignan solos en Start)")]
+    public Mov_Player3D scriptMovimientoJugador;  // Jugador
+    public GameplayManager gameplayManager;       // Manager global
+
+    private bool bloqueadoJugadorAntes = false;
+    private bool bloqueadoGlobalAntes = false;
+
+    private void Start()
+    {
+        // Buscar automáticamente el jugador si no está asignado
+        if (scriptMovimientoJugador == null)
+        {
+            // Primero intento por tag "Player"
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                scriptMovimientoJugador = playerObj.GetComponent<Mov_Player3D>();
+            }
+
+            // Si no lo encuentra por tag, busca cualquier Mov_Player3D en la escena
+            if (scriptMovimientoJugador == null)
+            {
+                scriptMovimientoJugador = Object.FindFirstObjectByType<Mov_Player3D>();
+            }
+
+            if (scriptMovimientoJugador == null)
+            {
+                Debug.LogWarning("EleccionInfluencias: No se encontró Mov_Player3D automáticamente.");
+            }
+        }
+
+        // Buscar automáticamente el GameplayManager si no está asignado
+        if (gameplayManager == null)
+        {
+            gameplayManager = Object.FindFirstObjectByType<GameplayManager>();
+            if (gameplayManager == null)
+            {
+                Debug.LogWarning("EleccionInfluencias: No se encontró GameplayManager automáticamente.");
+            }
+        }
+    }
 
     private void OnEnable()
     {
+        // Bloqueo del jugador
         if (scriptMovimientoJugador != null)
-            scriptMovimientoJugador.enabled = false;
+        {
+            bloqueadoJugadorAntes = scriptMovimientoJugador.controlesBloqueados;
+            scriptMovimientoJugador.controlesBloqueados = true;
+            scriptMovimientoJugador.ForzarIdle();
+        }
+
+        // Bloqueo global del gameplay manager
+        if (gameplayManager != null)
+        {
+            bloqueadoGlobalAntes = gameplayManager.controlesGlobalBloqueados;
+            gameplayManager.controlesGlobalBloqueados = true;
+        }
     }
 
     private void OnDisable()
     {
+        // Restaurar bloqueo del jugador
         if (scriptMovimientoJugador != null)
-            scriptMovimientoJugador.enabled = true;
+        {
+            scriptMovimientoJugador.controlesBloqueados = bloqueadoJugadorAntes;
+        }
+
+        // Restaurar bloqueo global
+        if (gameplayManager != null)
+        {
+            gameplayManager.controlesGlobalBloqueados = bloqueadoGlobalAntes;
+        }
     }
 
     public void EleccionBuena()
     {
-        sliderAnimado.SumarValor(30);
-        Debug.Log($"Elección: BUENA (+30). Valor objetivo: {sliderAnimado.valorObjetivo}");
+        if (sliderAnimado != null)
+            sliderAnimado.SumarValor(30);
+
         canvasEleccion.SetActive(false);
     }
 
     public void EleccionMala()
     {
-        sliderAnimado.SumarValor(-30);
-        Debug.Log($"Elección: MALA (-30). Valor objetivo: {sliderAnimado.valorObjetivo}");
+        if (sliderAnimado != null)
+            sliderAnimado.SumarValor(-30);
+
         canvasEleccion.SetActive(false);
     }
 }

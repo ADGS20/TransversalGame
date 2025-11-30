@@ -27,6 +27,9 @@ public class GameplayManager : MonoBehaviour
     [Tooltip("Tecla para cambiar de personaje")]
     public KeyCode teclaCambio = KeyCode.Tab;
 
+    [Tooltip("Tecla para activar seguimiento de la mascota")]
+    public KeyCode teclaActivarSeguimiento = KeyCode.X;
+
     [Tooltip("¿Se puede cambiar de personaje actualmente?")]
     public bool puedeCambiar = true;
 
@@ -34,9 +37,16 @@ public class GameplayManager : MonoBehaviour
     [Tooltip("Script de cámara orbital (se busca automáticamente si no se asigna)")]
     public CameraOrbital camaraOrbital;
 
+    [Header("Estado global de control")]
+    public bool controlesGlobalBloqueados = false;
+
     // Estado actual
     private bool controlandoCompanion = false;
     private Transform objetivoActual;
+
+    // Estado para recordar si estaba permitido el cambio y a quién controlábamos
+    private bool estadoPrevioPuedeCambiar;
+    private bool estadoPrevioControlandoCompanion;
 
     void Start()
     {
@@ -75,62 +85,38 @@ public class GameplayManager : MonoBehaviour
             }
         }
 
-        Debug.Log("🎮 GameplayManager iniciado. Presiona Tab para cambiar de personaje.");
+        Debug.Log("🎮 GameplayManager iniciado. Presiona Tab (o botón Y del mando) para cambiar de personaje.");
     }
 
     void Update()
     {
-        // Permitir cambio de personaje
-        if (puedeCambiar && Input.GetKeyDown(teclaCambio))
+        // Permitir cambio de personaje: Tab o botón Y del mando
+        bool cambioTeclado = Input.GetKeyDown(teclaCambio);
+        bool cambioMando = Input.GetKeyDown(KeyCode.JoystickButton3); // Botón Y Xbox
+
+        if (puedeCambiar && (cambioTeclado || cambioMando))
         {
             CambiarPersonaje();
         }
 
-        // CALCULAR MOVIMIENTO RELATIVO A LA CÁMARA
-        CalcularMovimientoRelativoCamara();
+        // --- ACTIVAR SEGUIMIENTO DE LA MASCOTA (X / botón B) ---
+        bool activarSeguimientoTeclado = Input.GetKeyDown(teclaActivarSeguimiento);
+        bool activarSeguimientoMando = Input.GetKeyDown(KeyCode.JoystickButton1); // B en Xbox
+
+        // Solo tiene sentido cuando estamos controlando al jugador
+        if (!controlandoCompanion && (activarSeguimientoTeclado || activarSeguimientoMando))
+        {
+            if (companionController != null)
+            {
+                companionController.ActivarSeguimiento();
+            }
+        }
     }
 
     void FixedUpdate()
     {
-        // SINCRONIZAR ROTACIÓN DE LA CÁMARA CON LOS PERSONAJES
+        // Sincronizar rotación de la cámara con los personajes
         SincronizarRotacionConCamara();
-    }
-
-    /// <summary>
-    /// Calcula el movimiento relativo a la cámara y lo envía al personaje activo
-    /// </summary>
-    private void CalcularMovimientoRelativoCamara()
-    {
-        if (camaraOrbital == null) return;
-
-        // Capturar input
-        float horizontal = Input.GetAxisRaw("Horizontal"); // A/D
-        float vertical = Input.GetAxisRaw("Vertical");     // W/S
-
-        // Obtener direcciones de la cámara (ya proyectadas en XZ)
-        Vector3 camaraForward = camaraOrbital.ObtenerDireccionForward();
-        Vector3 camaraRight = camaraOrbital.ObtenerDireccionRight();
-
-        // Calcular dirección de movimiento relativa a la cámara
-        // W (vertical > 0) = Alejar de cámara (dirección opuesta a donde mira) = +camaraForward
-        // S (vertical < 0) = Acercar a cámara (dirección hacia donde mira) = -camaraForward
-        Vector3 direccion = (camaraRight * horizontal + camaraForward * vertical);
-
-        // Normalizar para movimiento diagonal
-        if (direccion.magnitude > 1)
-        {
-            direccion.Normalize();
-        }
-
-        // Enviar dirección al personaje activo
-        if (!controlandoCompanion && scriptJugadorPrincipal != null)
-        {
-            scriptJugadorPrincipal.EstablecerDireccion(direccion);
-        }
-        else if (controlandoCompanion && companionController != null)
-        {
-            companionController.EstablecerDireccion(direccion);
-        }
     }
 
     /// <summary>
@@ -232,7 +218,7 @@ public class GameplayManager : MonoBehaviour
     public void HabilitarCambio()
     {
         puedeCambiar = true;
-        Debug.Log("✅ Zona de cambio activada. Presiona Tab para alternar.");
+        Debug.Log("✅ Zona de cambio activada. Presiona Tab o botón Y para alternar.");
     }
 
     /// <summary>
@@ -249,5 +235,60 @@ public class GameplayManager : MonoBehaviour
         }
 
         Debug.Log("❌ Zona de cambio desactivada.");
+    }
+
+    /// <summary>
+    /// Desactiva temporalmente el control de personajes (para menús, elecciones, etc.)
+    /// </summary>
+    public void PausarControl()
+    {
+        // Guardar estado previo
+        estadoPrevioPuedeCambiar = puedeCambiar;
+        estadoPrevioControlandoCompanion = controlandoCompanion;
+
+        // Bloquear cambios de personaje
+        puedeCambiar = false;
+
+        // Desactivar scripts de movimiento
+        if (scriptJugadorPrincipal != null)
+            scriptJugadorPrincipal.enabled = false;
+
+        if (companionController != null)
+            companionController.esControlable = false;
+
+        // Opcional: parar velocidades
+        if (rbJugadorPrincipal != null)
+            rbJugadorPrincipal.linearVelocity = Vector3.zero;
+        if (rbCompanion != null)
+            rbCompanion.linearVelocity = Vector3.zero;
+    }
+
+    /// <summary>
+    /// Restaura el control tal y como estaba antes de PausarControl()
+    /// </summary>
+    public void ReanudarControl()
+    {
+        // Restaurar posibilidad de cambio
+        puedeCambiar = estadoPrevioPuedeCambiar;
+
+        // Restaurar quién estaba siendo controlado
+        if (estadoPrevioControlandoCompanion)
+        {
+            // Volver a controlar compañero
+            if (scriptJugadorPrincipal != null)
+                scriptJugadorPrincipal.enabled = false;
+
+            if (companionController != null)
+                companionController.ActivarControl();
+        }
+        else
+        {
+            // Volver a controlar jugador
+            if (scriptJugadorPrincipal != null)
+                scriptJugadorPrincipal.enabled = true;
+
+            if (companionController != null)
+                companionController.DesactivarControl();
+        }
     }
 }

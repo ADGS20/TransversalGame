@@ -37,22 +37,31 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Anisotropy: 0.109
+    - _DebugMode: 0
     - _DensityMultiplier: 0.05
     - _FogBrightness: 3
-    - _FogDensity: 0.22
-    - _FogHeight: 0.1
-    - _FogHeightFalloff: 0.1
+    - _FogDensity: 0.05
+    - _FogHeight: 0
+    - _FogHeightFalloff: 0.18
     - _FogSoftness: 2
     - _Jitter: 1
-    - _MaxDistance: 0.18
+    - _JitterAmount: 0.05
+    - _LightIntensity: 3
+    - _LightScattering: 4
+    - _MaxDistance: 45
+    - _NoiseIntensity: 0.25
     - _NoiseOffset: 0.5
     - _NoiseScale: 0.1
-    - _NoiseThreshold: 0.5
+    - _NoiseThreshold: 0.55
+    - _NoiseTiling: 0.01
     - _NumSteps: 128
     - _PhaseG: 0.5
-    - _StepSize: 0.5
+    - _StepSize: 2.2
     m_Colors:
-    - _FogColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FogColor: {r: 0.64705884, g: 0.7764706, b: 1, a: 1}
+    - _LightColor: {r: 1, g: 0.9, b: 0.7, a: 1}
+    - _LightColorTint: {r: 1, g: 0.9019608, b: 0.6901961, a: 1}
     - _LightTint: {r: 1, g: 1, b: 1, a: 1}
     - _NoiseScale: {r: 1, g: 1, b: 1, a: 0}
     - _NoiseSpeed: {r: 0.1, g: 0.1, b: 0.1, a: 0}
