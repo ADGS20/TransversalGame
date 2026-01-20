@@ -1,28 +1,40 @@
+﻿//------------Creador de este script------------//
+//---- Hecho por: Andres Diaz Guerrero Soto ----//
+//----------------------------------------------//
 using UnityEngine;
 
 public class BreakableBranch : MonoBehaviour
 {
     [Header("Visual de la rama")]
-    public GameObject ramaEntera;   // Rama normal
-    public GameObject ramaRota;     // Rama rota (opcional)
+    public GameObject ramaEntera;
+    public GameObject ramaRota;
 
-    [Header("Objeto pesado que caer�")]
-    public GameObject objetoPesadoPrefab; // Prefab del tronco/roca
-    public Transform puntoCaida;          // Empty donde aparecer�
+    [Header("Objeto pesado existente en la escena")]
+    public Rigidbody objetoPesado;
 
     [Header("Opciones")]
-    public float fuerzaCaida = -5f;       // Impulso inicial hacia abajo
-    public float tiempoDestruirRama = 2f; // Limpieza opcional
+    public float fuerzaCaida = -5f;
+    public float tiempoDestruirRama = 2f;
 
     private bool rota = false;
+
+    private void Start()
+    {
+        // 🔒 Al inicio, el objeto pesado está bloqueado
+        if (objetoPesado != null)
+        {
+            objetoPesado.useGravity = false;
+            objetoPesado.isKinematic = true;
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (rota) return;
 
-        // Detectar impacto de la piedra
         if (collision.gameObject.CompareTag("Projectile"))
         {
+            Debug.Log("💥 Rama golpeada por la piedra");
             RomperRama();
         }
     }
@@ -31,29 +43,25 @@ public class BreakableBranch : MonoBehaviour
     {
         rota = true;
 
-        // Cambiar visual
         if (ramaEntera != null)
             ramaEntera.SetActive(false);
 
         if (ramaRota != null)
             ramaRota.SetActive(true);
 
-        // Instanciar el objeto pesado
-        if (objetoPesadoPrefab != null && puntoCaida != null)
+        if (objetoPesado != null)
         {
-            GameObject obj = Instantiate(objetoPesadoPrefab, puntoCaida.position, Quaternion.identity);
+            // 🔓 Activar físicas del objeto pesado
+            objetoPesado.isKinematic = false;
+            objetoPesado.useGravity = true;
 
-            Rigidbody rb = obj.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.useGravity = true;
-                rb.AddForce(Vector3.up * fuerzaCaida, ForceMode.Impulse);
-            }
+            // 💨 Aplicar impulso hacia abajo
+            objetoPesado.AddForce(Vector3.up * fuerzaCaida, ForceMode.Impulse);
+
+            Debug.Log("🪵 Objeto pesado liberado");
         }
 
-        // Destruir rama si quieres limpiar
         if (tiempoDestruirRama > 0)
             Destroy(gameObject, tiempoDestruirRama);
     }
 }
-
