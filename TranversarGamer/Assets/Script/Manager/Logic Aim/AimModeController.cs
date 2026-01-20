@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿//------------Creador de este script------------//
+//---- Hecho por: Andres Diaz Guerrero Soto ----//
+//----------------------------------------------//
+using UnityEngine;
 
 public class AimModeController : MonoBehaviour
 {

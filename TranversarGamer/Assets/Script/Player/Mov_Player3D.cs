@@ -25,10 +25,11 @@ public class Mov_Player3D : MonoBehaviour
     [Header("Estado de control")]
     [HideInInspector] public bool controlesBloqueados = false;
 
+    [HideInInspector] public Vector3 direccionMovimiento;
+
     private Camera camaraJuego;
     private float movimientoHorizontal;
     private float movimientoVertical;
-    private Vector3 direccionMovimiento;
     private Rigidbody rb;
     private bool enSuelo;
 
