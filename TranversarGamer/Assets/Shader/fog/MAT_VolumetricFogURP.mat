@@ -41,19 +41,19 @@ Material:
     - _DebugMode: 0
     - _DensityMultiplier: 0.05
     - _FogBrightness: 3
-    - _FogDensity: 0.05
+    - _FogDensity: 0.025
     - _FogHeight: 0
     - _FogHeightFalloff: 0.18
     - _FogSoftness: 2
     - _Jitter: 1
-    - _JitterAmount: 0.58
+    - _JitterAmount: 0.65
     - _LightIntensity: 3
     - _LightScattering: 4
     - _MaxDistance: 45
     - _NoiseIntensity: 0.25
     - _NoiseOffset: 0.5
     - _NoiseScale: 0.1
-    - _NoiseThreshold: 0.99
+    - _NoiseThreshold: 1.49
     - _NoiseTiling: 0.01
     - _NumSteps: 128
     - _PhaseG: 0.5
