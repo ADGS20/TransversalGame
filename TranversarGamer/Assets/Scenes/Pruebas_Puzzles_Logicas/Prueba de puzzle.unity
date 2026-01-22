@@ -1156,6 +1156,10 @@ PrefabInstance:
       propertyPath: scriptJugadorPrincipal
       value: 
       objectReference: {fileID: 628597366}
+    - target: {fileID: 3181428360533566895, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: indicadorVisual
+      value: 
+      objectReference: {fileID: 1353772389}
     - target: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
       propertyPath: m_Name
       value: Manager
@@ -1224,6 +1228,10 @@ PrefabInstance:
       propertyPath: animator
       value: 
       objectReference: {fileID: 1831527290}
+    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
+      propertyPath: capaSuelo.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -1689,7 +1697,7 @@ Transform:
   m_GameObject: {fileID: 1353772388}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.13036, y: 0.608, z: -0.5}
+  m_LocalPosition: {x: -0.008, y: 0.608, z: 2.4}
   m_LocalScale: {x: 1, y: 1, z: 6.6666665}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1720,7 +1728,7 @@ Transform:
   m_GameObject: {fileID: 1354999640}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.513, z: 0}
+  m_LocalPosition: {x: -0.069, y: 0.607, z: 2.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
