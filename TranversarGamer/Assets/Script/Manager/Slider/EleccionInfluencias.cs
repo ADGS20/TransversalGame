@@ -6,29 +6,29 @@ using UnityEngine;
 
 public class EleccionInfluencias : MonoBehaviour
 {
-    public SliderAnimado sliderAnimado;
-    public GameObject canvasEleccion;
+    public SliderAnimado sliderAnimado;      // Controla la barra animada de influencia
+    public GameObject canvasEleccion;        // Canvas que muestra las opciones de elección
 
     [Header("Control (se asignan solos en Start)")]
-    public Mov_Player3D scriptMovimientoJugador;  // Jugador
-    public GameplayManager gameplayManager;       // Manager global
+    public Mov_Player3D scriptMovimientoJugador;  // Referencia al jugador
+    public GameplayManager gameplayManager;       // Referencia al gestor global
 
-    private bool bloqueadoJugadorAntes = false;
-    private bool bloqueadoGlobalAntes = false;
+    private bool bloqueadoJugadorAntes = false;   // Guarda el estado previo del jugador
+    private bool bloqueadoGlobalAntes = false;    // Guarda el estado previo del manager
 
     private void Start()
     {
-        // Buscar automáticamente el jugador si no está asignado
+        // Buscar automáticamente el script del jugador si no está asignado
         if (scriptMovimientoJugador == null)
         {
-            // Primero intento por tag "Player"
+            // Intentar encontrarlo por tag
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
             {
                 scriptMovimientoJugador = playerObj.GetComponent<Mov_Player3D>();
             }
 
-            // Si no lo encuentra por tag, busca cualquier Mov_Player3D en la escena
+            // Si no se encontró por tag, buscar cualquier instancia en la escena
             if (scriptMovimientoJugador == null)
             {
                 scriptMovimientoJugador = Object.FindFirstObjectByType<Mov_Player3D>();
@@ -53,7 +53,7 @@ public class EleccionInfluencias : MonoBehaviour
 
     private void OnEnable()
     {
-        // Bloqueo del jugador
+        // Bloquear controles del jugador mientras el menú está activo
         if (scriptMovimientoJugador != null)
         {
             bloqueadoJugadorAntes = scriptMovimientoJugador.controlesBloqueados;
@@ -61,7 +61,7 @@ public class EleccionInfluencias : MonoBehaviour
             scriptMovimientoJugador.ForzarIdle();
         }
 
-        // Bloqueo global del gameplay manager
+        // Bloquear controles globales del juego
         if (gameplayManager != null)
         {
             bloqueadoGlobalAntes = gameplayManager.controlesGlobalBloqueados;
@@ -71,19 +71,20 @@ public class EleccionInfluencias : MonoBehaviour
 
     private void OnDisable()
     {
-        // Restaurar bloqueo del jugador
+        // Restaurar estado previo del jugador
         if (scriptMovimientoJugador != null)
         {
             scriptMovimientoJugador.controlesBloqueados = bloqueadoJugadorAntes;
         }
 
-        // Restaurar bloqueo global
+        // Restaurar estado previo del manager
         if (gameplayManager != null)
         {
             gameplayManager.controlesGlobalBloqueados = bloqueadoGlobalAntes;
         }
     }
 
+    // Elección positiva: aumenta la influencia
     public void EleccionBuena()
     {
         if (sliderAnimado != null)
@@ -92,6 +93,7 @@ public class EleccionInfluencias : MonoBehaviour
         canvasEleccion.SetActive(false);
     }
 
+    // Elección negativa: disminuye la influencia
     public void EleccionMala()
     {
         if (sliderAnimado != null)

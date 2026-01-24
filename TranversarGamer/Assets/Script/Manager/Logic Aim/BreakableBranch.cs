@@ -1,26 +1,27 @@
 ﻿//------------Creador de este script------------//
 //---- Hecho por: Andres Diaz Guerrero Soto ----//
 //----------------------------------------------//
+
 using UnityEngine;
 
 public class BreakableBranch : MonoBehaviour
 {
     [Header("Visual de la rama")]
-    public GameObject ramaEntera;
-    public GameObject ramaRota;
+    public GameObject ramaEntera; // Modelo de la rama intacta
+    public GameObject ramaRota;   // Modelo de la rama rota
 
     [Header("Objeto pesado existente en la escena")]
-    public Rigidbody objetoPesado;
+    public Rigidbody objetoPesado; // Objeto que caerá al romper la rama
 
     [Header("Opciones")]
-    public float fuerzaCaida = -5f;
-    public float tiempoDestruirRama = 2f;
+    public float fuerzaCaida = -5f;      // Fuerza aplicada hacia abajo al objeto pesado
+    public float tiempoDestruirRama = 2f; // Tiempo antes de destruir la rama rota
 
-    private bool rota = false;
+    private bool rota = false; // Evita romper la rama más de una vez
 
     private void Start()
     {
-        // 🔒 Al inicio, el objeto pesado está bloqueado
+        // Al inicio, el objeto pesado está bloqueado
         if (objetoPesado != null)
         {
             objetoPesado.useGravity = false;
@@ -30,11 +31,12 @@ public class BreakableBranch : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        // Evitar múltiples activaciones
         if (rota) return;
 
+        // Si la rama es golpeada por un proyectil, se rompe
         if (collision.gameObject.CompareTag("Projectile"))
         {
-            Debug.Log("💥 Rama golpeada por la piedra");
             RomperRama();
         }
     }
@@ -43,24 +45,24 @@ public class BreakableBranch : MonoBehaviour
     {
         rota = true;
 
+        // Cambiar visual de rama entera a rota
         if (ramaEntera != null)
             ramaEntera.SetActive(false);
 
         if (ramaRota != null)
             ramaRota.SetActive(true);
 
+        // Liberar el objeto pesado
         if (objetoPesado != null)
         {
-            // 🔓 Activar físicas del objeto pesado
             objetoPesado.isKinematic = false;
             objetoPesado.useGravity = true;
 
-            // 💨 Aplicar impulso hacia abajo
+            // Aplicar impulso hacia abajo
             objetoPesado.AddForce(Vector3.up * fuerzaCaida, ForceMode.Impulse);
-
-            Debug.Log("🪵 Objeto pesado liberado");
         }
 
+        // Destruir la rama después de un tiempo
         if (tiempoDestruirRama > 0)
             Destroy(gameObject, tiempoDestruirRama);
     }

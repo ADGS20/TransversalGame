@@ -1,55 +1,60 @@
 ﻿//------------Creador de este script------------//
 //---- Hecho por: Andres Diaz Guerrero Soto ----//
 //----------------------------------------------//
+
 using UnityEngine;
 
 public class AimModeController : MonoBehaviour
 {
     [Header("Cámaras")]
-    public CameraOrbital camaraOrbital;
-    public Camera fpsCamera;
+    public CameraOrbital camaraOrbital;   // Cámara orbital usada normalmente
+    public Camera fpsCamera;              // Cámara usada en modo apuntado
 
     [Header("Jugador y disparo")]
-    public Mov_Player3D playerMovement;
-    public Transform firePoint;
-    public GameObject stonePrefab;
-    public float fuerzaDisparo = 15f;
+    public Mov_Player3D playerMovement;   // Controlador del jugador
+    public Transform firePoint;           // Punto desde donde se dispara la piedra
+    public GameObject stonePrefab;        // Prefab del proyectil
+    public float fuerzaDisparo = 15f;     // Fuerza aplicada al proyectil
 
     [Header("Jugador visual")]
-    public GameObject jugadorVisual; // sprite o modelo del jugador
+    public GameObject jugadorVisual;      // Modelo o sprite del jugador visible en tercera persona
 
     [Header("Trayectoria")]
-    public LineRenderer lineRenderer;
-    public int puntos = 30;
+    public LineRenderer lineRenderer;     // Línea que muestra la trayectoria del disparo
+    public int puntos = 30;               // Cantidad de puntos de la curva
     public float tiempoEntrePuntos = 0.1f;
 
     [Header("Rotación FPS")]
-    public float sensibilidadX = 2f;
-    public float sensibilidadY = 2f;
-    public float limiteYMin = -60f;
-    public float limiteYMax = 60f;
+    public float sensibilidadX = 2f;      // Sensibilidad horizontal del ratón
+    public float sensibilidadY = 2f;      // Sensibilidad vertical del ratón
+    public float limiteYMin = -60f;       // Límite inferior del ángulo vertical
+    public float limiteYMax = 60f;        // Límite superior del ángulo vertical
 
-    private bool apuntando = false;
-    private float rotacionY = 0f; // yaw relativo
-    private float rotacionX = 0f; // pitch
+    private bool apuntando = false;       // Indica si el jugador está en modo apuntado
+    private float rotacionY = 0f;         // Rotación horizontal acumulada
+    private float rotacionX = 0f;         // Rotación vertical acumulada
 
     void Start()
     {
+        // Desactivar cámara FPS al inicio
         if (fpsCamera != null)
             fpsCamera.gameObject.SetActive(false);
 
+        // Configurar LineRenderer si existe
         if (lineRenderer != null)
         {
             lineRenderer.enabled = false;
-            lineRenderer.useWorldSpace = true; // 🔥 importante para que los puntos en mundo se vean bien
+            lineRenderer.useWorldSpace = true;
         }
     }
 
     void Update()
     {
+        // Activar modo apuntado al presionar botón derecho
         if (Input.GetMouseButtonDown(1))
             ActivarModoApuntar();
 
+        // Desactivar modo apuntado al soltar botón derecho
         if (Input.GetMouseButtonUp(1))
             DesactivarModoApuntar();
 
@@ -58,6 +63,7 @@ public class AimModeController : MonoBehaviour
             RotarFPS();
             MostrarTrayectoria();
 
+            // Disparo con clic izquierdo
             if (Input.GetMouseButtonDown(0))
                 Disparar();
         }
@@ -71,29 +77,32 @@ public class AimModeController : MonoBehaviour
     {
         apuntando = true;
 
+        // Bloquear movimiento del jugador
         if (playerMovement != null)
         {
             playerMovement.controlesBloqueados = true;
             playerMovement.ForzarIdle();
         }
 
-        // 🔥 Solo ocultar jugadorVisual si NO es el mismo objeto que el LineRenderer
+        // Ocultar modelo del jugador si no es el mismo objeto que la línea
         if (jugadorVisual != null && (lineRenderer == null || jugadorVisual != lineRenderer.gameObject))
             jugadorVisual.SetActive(false);
 
-        // Obtener rotación REAL de la cámara orbital
+        // Obtener rotación actual de la cámara orbital
         float yaw = camaraOrbital.ObtenerAnguloActual();
 
-        // No movemos la cámara, solo la rotamos
+        // Configurar cámara FPS con la rotación horizontal correcta
         fpsCamera.transform.localRotation = Quaternion.identity;
         fpsCamera.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
         rotacionX = 0f;
         rotacionY = 0f;
 
+        // Cambiar cámaras
         camaraOrbital.gameObject.SetActive(false);
         fpsCamera.gameObject.SetActive(true);
 
+        // Bloquear cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -102,16 +111,19 @@ public class AimModeController : MonoBehaviour
     {
         apuntando = false;
 
+        // Restaurar movimiento del jugador
         if (playerMovement != null)
             playerMovement.controlesBloqueados = false;
 
-        // 🔥 Solo reactivar jugadorVisual si NO es el mismo objeto que el LineRenderer
+        // Mostrar modelo del jugador si corresponde
         if (jugadorVisual != null && (lineRenderer == null || jugadorVisual != lineRenderer.gameObject))
             jugadorVisual.SetActive(true);
 
+        // Restaurar cámaras
         fpsCamera.gameObject.SetActive(false);
         camaraOrbital.gameObject.SetActive(true);
 
+        // Restaurar cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -120,47 +132,57 @@ public class AimModeController : MonoBehaviour
     {
         if (fpsCamera == null) return;
 
+        // Lectura del ratón
         float mouseX = Input.GetAxis("Mouse X") * sensibilidadX;
         float mouseY = Input.GetAxis("Mouse Y") * sensibilidadY;
 
+        // Acumular rotación
         rotacionY += mouseX;
         rotacionX -= mouseY;
+
+        // Limitar rotación vertical
         rotacionX = Mathf.Clamp(rotacionX, limiteYMin, limiteYMax);
 
-        // Rotar jugador en Y
-        playerMovement.transform.rotation = Quaternion.Euler(0f, camaraOrbital.ObtenerAnguloActual() + rotacionY, 0f);
+        // Rotar jugador horizontalmente
+        playerMovement.transform.rotation =
+            Quaternion.Euler(0f, camaraOrbital.ObtenerAnguloActual() + rotacionY, 0f);
 
-        // Rotar cámara solo en X local
+        // Rotar cámara verticalmente
         fpsCamera.transform.localRotation = Quaternion.Euler(rotacionX, 0f, 0f);
 
+        // Alinear firePoint con la cámara
         if (firePoint != null)
             firePoint.rotation = fpsCamera.transform.rotation;
     }
 
     void Disparar()
     {
+        // Validar prefab
         if (stonePrefab == null)
         {
-            Debug.LogError("❌ stonePrefab NO está asignado.");
+            Debug.LogError("stonePrefab no está asignado.");
             return;
         }
 
+        // Instanciar proyectil
         GameObject piedra = Instantiate(stonePrefab, firePoint.position, firePoint.rotation);
 
         if (piedra == null)
         {
-            Debug.LogError("❌ Error al instanciar la piedra.");
+            Debug.LogError("Error al instanciar la piedra.");
             return;
         }
 
+        // Obtener Rigidbody
         Rigidbody rb = piedra.GetComponent<Rigidbody>();
 
         if (rb == null)
         {
-            Debug.LogError("❌ El prefab de la piedra NO tiene Rigidbody.");
+            Debug.LogError("El prefab de la piedra no tiene Rigidbody.");
             return;
         }
 
+        // Aplicar fuerza de disparo
         rb.AddForce(firePoint.forward * fuerzaDisparo, ForceMode.Impulse);
     }
 
@@ -175,13 +197,15 @@ public class AimModeController : MonoBehaviour
 
         Vector3[] puntosTrayectoria = new Vector3[puntos];
 
+        // Calcular puntos de la parábola
         for (int i = 0; i < puntos; i++)
         {
             float t = i * tiempoEntrePuntos;
 
-            Vector3 punto = posInicial +
-                            velocidadInicial * t +
-                            0.5f * Physics.gravity * (t * t);
+            Vector3 punto =
+                posInicial +
+                velocidadInicial * t +
+                0.5f * Physics.gravity * (t * t);
 
             puntosTrayectoria[i] = punto;
         }

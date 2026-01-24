@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Suelo
   - Projectile
+  - Criatura
   layers:
   - Default
   - TransparentFX
