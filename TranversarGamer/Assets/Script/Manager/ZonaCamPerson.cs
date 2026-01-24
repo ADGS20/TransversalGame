@@ -5,36 +5,29 @@
 using UnityEngine;
 
 /// <summary>
-/// Zona donde se puede alternar entre el jugador principal y el compañero
-/// Similar a las zonas especiales en Mario & Luigi: Partners in Time
-/// Versión para 3D con Collider 3D
+/// Zona donde se puede alternar entre el jugador principal y el compañero.
+/// Funciona mediante un collider tipo trigger.
 /// </summary>
 public class ZonaCamPerson : MonoBehaviour
 {
     [Header("Configuración")]
-    [Tooltip("Referencia al GameplayManager")]
-    public GameplayManager gameplayManager;
+    public GameplayManager gameplayManager; // Referencia al gestor de gameplay
 
     [Header("Visual (Opcional)")]
-    [Tooltip("Material o renderer para indicar la zona")]
-    public Renderer indicadorVisual;
-
-    [Tooltip("Color cuando la zona está activa")]
-    public Color colorActivo = Color.green;
-
-    [Tooltip("Color cuando la zona está inactiva")]
-    public Color colorInactivo = Color.white; // ← AQUÍ ESTABA EL ERROR
+    public Renderer indicadorVisual;        // Renderer para mostrar estado visual de la zona
+    public Color colorActivo = Color.green; // Color cuando el jugador está dentro
+    public Color colorInactivo = Color.white;
 
     void Start()
     {
-        // Asegurar que el collider es trigger
+        // Asegurar que el collider está configurado como trigger
         Collider col = GetComponent<Collider>();
         if (col != null)
         {
             col.isTrigger = true;
         }
 
-        // Obtener renderer si no está asignado
+        // Si no se asignó un renderer, intentar obtenerlo del mismo objeto
         if (indicadorVisual == null)
         {
             indicadorVisual = GetComponent<Renderer>();
@@ -43,15 +36,14 @@ public class ZonaCamPerson : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Verificar si el jugador principal entró en la zona
+        // Activar cambio de personaje cuando el jugador entra
         if (other.CompareTag("Player"))
         {
             if (gameplayManager != null)
             {
                 gameplayManager.HabilitarCambio();
-                Debug.Log("🟢 Entraste en una zona de cambio. Presiona Tab para alternar personajes.");
 
-                // Activar indicador visual si existe
+                // Cambiar color del indicador visual
                 if (indicadorVisual != null)
                 {
                     indicadorVisual.material.color = colorActivo;
@@ -62,15 +54,14 @@ public class ZonaCamPerson : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Verificar si el jugador principal salió de la zona
+        // Desactivar cambio de personaje cuando el jugador sale
         if (other.CompareTag("Player"))
         {
             if (gameplayManager != null)
             {
                 gameplayManager.DeshabilitarCambio();
-                Debug.Log("⚪ Saliste de la zona de cambio.");
 
-                // Desactivar indicador visual si existe
+                // Restaurar color del indicador visual
                 if (indicadorVisual != null)
                 {
                     indicadorVisual.material.color = colorInactivo;

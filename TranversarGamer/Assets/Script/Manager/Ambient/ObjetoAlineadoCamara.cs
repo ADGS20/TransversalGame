@@ -6,19 +6,19 @@ using UnityEngine;
 
 public class ObjetoAlineadoCamara : MonoBehaviour
 {
-    public CameraOrbital camaraOrbital; // Opcional: puedes arrastrarlo manualmente
-    private float rotacionXFija = 30f; // Rotación fija en el eje X
+    public CameraOrbital camaraOrbital; // Referencia a la cámara orbital
+    private float rotacionXFija = 30f;  // Rotación fija en el eje X para mantener inclinación constante
 
     void Start()
     {
-        // Si no se asignó manualmente, busca automáticamente
+        // Si no se asignó manualmente, buscar automáticamente una cámara orbital en la escena
         if (camaraOrbital == null)
         {
             camaraOrbital = Object.FindFirstObjectByType<CameraOrbital>();
 
             if (camaraOrbital == null)
             {
-                Debug.LogWarning("No se encontró ningún objeto con el script CameraOrbital en la escena.");
+                Debug.LogWarning("No se encontró ningún objeto con CameraOrbital en la escena.");
             }
         }
     }
@@ -27,9 +27,10 @@ public class ObjetoAlineadoCamara : MonoBehaviour
     {
         if (camaraOrbital == null) return;
 
+        // Obtener el ángulo Y actual de la cámara orbital
         float anguloCamara = camaraOrbital.ObtenerAnguloActual();
 
-        // Alinea el objeto con el eje Y de la cámara, manteniendo X fijo
+        // Alinear el objeto con la rotación horizontal de la cámara, manteniendo X fijo
         transform.rotation = Quaternion.Euler(rotacionXFija, anguloCamara, 0f);
     }
 }

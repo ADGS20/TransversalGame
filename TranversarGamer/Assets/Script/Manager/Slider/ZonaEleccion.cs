@@ -6,10 +6,12 @@ using UnityEngine;
 
 public class ZonaEleccion : MonoBehaviour
 {
-    public GameObject canvasEleccion; // Asigna el Canvas de elecciones aquí
+    // Canvas que contiene las opciones de elección
+    public GameObject canvasEleccion;
 
     private void OnTriggerEnter(Collider other)
     {
+        // Cuando el jugador entra en la zona, se muestra el menú de elección
         if (other.CompareTag("Player"))
         {
             canvasEleccion.SetActive(true);
