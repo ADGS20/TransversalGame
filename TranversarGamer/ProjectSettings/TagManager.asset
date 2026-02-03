@@ -7,6 +7,7 @@ TagManager:
   - Suelo
   - Projectile
   - Criatura
+  - PushableObject
   layers:
   - Default
   - TransparentFX
