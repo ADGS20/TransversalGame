@@ -9,7 +9,7 @@ public class ButtonManager : MonoBehaviour
 
     public void StartBut()
     {
-        SceneManager.LoadScene("BEta Escenario");
+        SceneManager.LoadScene("Beta_Escenario");
     }
     public void Optionbut()
     {
