@@ -1394,26 +1394,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Jugador
       objectReference: {fileID: 0}
-    - target: {fileID: 1685344047094445765, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9659258
-      objectReference: {fileID: 0}
-    - target: {fileID: 1685344047094445765, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.2588191
-      objectReference: {fileID: 0}
-    - target: {fileID: 1685344047094445765, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 1694578277610703039, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_Size.z
-      value: 2.3949754
-      objectReference: {fileID: 0}
-    - target: {fileID: 1694578277610703039, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_Center.z
-      value: 0.6974876
-      objectReference: {fileID: 0}
     - target: {fileID: 2257911768635262757, guid: 2c2962e410106ec43816731122a5171a, type: 3}
       propertyPath: m_LocalPosition.x
       value: -26.143002
@@ -1453,38 +1433,6 @@ PrefabInstance:
     - target: {fileID: 2257911768635262757, guid: 2c2962e410106ec43816731122a5171a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2729799848076205321, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: animator
-      value: 
-      objectReference: {fileID: 1290110542}
-    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: rotacionSuave
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: capaSuelo.m_Bits
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: velocidadRotacion
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 3301684060640798606, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: anguloInclinacionX
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 5687715354709867048, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_Constraints
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 5687715354709867048, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-      propertyPath: m_Interpolate
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4306,11 +4254,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camaraOrbital: {fileID: 1367608013}
---- !u!95 &1290110542 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 104216054575364628, guid: 2c2962e410106ec43816731122a5171a, type: 3}
-  m_PrefabInstance: {fileID: 332338462}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1292701520
 GameObject:
   m_ObjectHideFlags: 0
@@ -7000,6 +6943,10 @@ PrefabInstance:
     - target: {fileID: 6022878523083145768, guid: 184671193e6c1e8448cd175dc1ac4469, type: 3}
       propertyPath: m_Name
       value: Main Camera
+      objectReference: {fileID: 0}
+    - target: {fileID: 7504202198242967211, guid: 184671193e6c1e8448cd175dc1ac4469, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
