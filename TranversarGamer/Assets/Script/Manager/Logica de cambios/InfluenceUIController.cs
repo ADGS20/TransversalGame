@@ -4,81 +4,101 @@ using System.Collections.Generic;
 
 public class InfluenceUIController : MonoBehaviour
 {
-    [Header("Referencias")]
-    public SliderAnimado sliderAnimado;          // Valor de influencia (-100 a 100)
-    public Text titulo;                          // Título dinámico
-    public List<GameObject> botonesBuenos;       // Botones que aparecen en estado luminoso
-    public List<GameObject> botonesMalos;        // Botones que aparecen en estado corrupto
-    public List<GameObject> botonesNeutrales;    // Botones que aparecen en estado neutral
+    [Header("UI")]
+    public Text titulo;
 
-    [Header("Rangos de Estado")]
-    public float limiteCorrupto = -30f;
-    public float limiteLuminoso = 30f;
+    [Header("Botones por estado")]
+    public List<GameObject> botonesBuenos = new List<GameObject>();
+    public List<GameObject> botonesMalos = new List<GameObject>();
+    public List<GameObject> botonesNeutrales = new List<GameObject>();
 
-    public enum EstadoInfluencia
+    [Header("Títulos por estado (listas)")]
+    [Tooltip("Lista de títulos posibles para estado Luminoso. Se elige por index o el primero si el index no existe.")]
+    public List<string> titulosBuenos = new List<string>();
+    [Tooltip("Lista de títulos posibles para estado Neutral.")]
+    public List<string> titulosNeutrales = new List<string>();
+    [Tooltip("Lista de títulos posibles para estado Corrupto.")]
+    public List<string> titulosMalos = new List<string>();
+
+    [Header("Selección de título")]
+    [Tooltip("Índice usado para elegir el título dentro de la lista. Si está fuera de rango se usa el primero.")]
+    public int tituloIndex = 0;
+    [Tooltip("Si está activado, concatena todos los títulos de la lista separados por ' - ' en lugar de elegir uno.")]
+    public bool concatenarTitulos = false;
+
+    [Header("Textos por defecto (si las listas están vacías)")]
+    public string textoCorrupto = "Influencia Corrupta";
+    public string textoNeutral = "Influencia Neutral";
+    public string textoLuminoso = "Influencia Lumínica";
+
+    void OnEnable()
     {
-        Corrupto,
-        Neutral,
-        Luminoso
+        if (InfluenceState.Instance != null)
+        {
+            AplicarEstado(InfluenceState.Instance.CurrentEstado);
+            InfluenceState.Instance.OnEstadoChanged += AplicarEstado;
+        }
     }
 
-    public EstadoInfluencia estadoActual { get; private set; }
-
-    void Awake()
+    void OnDisable()
     {
-        DontDestroyOnLoad(gameObject); // Persistente en toda la escena
+        if (InfluenceState.Instance != null)
+            InfluenceState.Instance.OnEstadoChanged -= AplicarEstado;
     }
 
-    void Update()
+    void AplicarEstado(InfluenceState.EstadoInfluencia estado)
     {
-        ActualizarEstado();
-        ActualizarUI();
-    }
-
-    void ActualizarEstado()
-    {
-        float valor = sliderAnimado.valorObjetivo;
-
-        if (valor <= limiteCorrupto)
-            estadoActual = EstadoInfluencia.Corrupto;
-        else if (valor >= limiteLuminoso)
-            estadoActual = EstadoInfluencia.Luminoso;
-        else
-            estadoActual = EstadoInfluencia.Neutral;
-    }
-
-    void ActualizarUI()
-    {
-        // Ocultar todo
+        // Ocultar todo primero
         SetLista(botonesBuenos, false);
         SetLista(botonesMalos, false);
         SetLista(botonesNeutrales, false);
 
-        switch (estadoActual)
+        // Aplicar botones y título según estado
+        switch (estado)
         {
-            case EstadoInfluencia.Corrupto:
-                titulo.text = "Influencia Corrupta";
+            case InfluenceState.EstadoInfluencia.Corrupto:
                 SetLista(botonesMalos, true);
+                SetTitulo(GetTituloFromList(titulosMalos, textoCorrupto));
                 break;
 
-            case EstadoInfluencia.Neutral:
-                titulo.text = "Influencia Neutral";
+            case InfluenceState.EstadoInfluencia.Neutral:
                 SetLista(botonesNeutrales, true);
+                SetTitulo(GetTituloFromList(titulosNeutrales, textoNeutral));
                 break;
 
-            case EstadoInfluencia.Luminoso:
-                titulo.text = "Influencia Lumínica";
+            case InfluenceState.EstadoInfluencia.Luminoso:
                 SetLista(botonesBuenos, true);
+                SetTitulo(GetTituloFromList(titulosBuenos, textoLuminoso));
                 break;
         }
     }
 
-    void SetLista(List<GameObject> lista, bool estado)
+    string GetTituloFromList(List<string> lista, string fallback)
     {
-        foreach (var obj in lista)
-        {
-            if (obj != null)
-                obj.SetActive(estado);
-        }
+        if (titulo == null) return fallback;
+
+        if (lista == null || lista.Count == 0)
+            return fallback;
+
+        if (concatenarTitulos)
+            return string.Join(" - ", lista);
+
+        if (tituloIndex >= 0 && tituloIndex < lista.Count)
+            return lista[tituloIndex];
+
+        return lista[0];
+    }
+
+    void SetTitulo(string texto)
+    {
+        if (titulo != null)
+            titulo.text = texto;
+    }
+
+    void SetLista(List<GameObject> lista, bool activo)
+    {
+        if (lista == null) return;
+        foreach (var go in lista)
+            if (go != null) go.SetActive(activo);
     }
 }

@@ -84,21 +84,19 @@ public class EleccionInfluencias : MonoBehaviour
         }
     }
 
-    // Elección positiva: aumenta la influencia
+    // Eleccion buena
     public void EleccionBuena()
     {
-        if (sliderAnimado != null)
-            sliderAnimado.SumarValor(30);
-
+        InfluenceState.Instance.ModifyValue(30f);
         canvasEleccion.SetActive(false);
     }
 
-    // Elección negativa: disminuye la influencia
+    // Eleccion mala
     public void EleccionMala()
     {
-        if (sliderAnimado != null)
-            sliderAnimado.SumarValor(-30);
-
+        InfluenceState.Instance.ModifyValue(-30f);
         canvasEleccion.SetActive(false);
     }
+
+
 }

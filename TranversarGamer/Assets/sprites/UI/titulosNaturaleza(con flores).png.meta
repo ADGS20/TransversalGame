@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a6370af96a11c4b4f9a9bd37a7b60445
+guid: 54ed094835bf2ff459d4bef2c8895e98
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -121,73 +121,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: titulosNeutral_0
-      rect:
-        serializedVersion: 2
-        x: 1022
-        y: 1574
-        width: 1617
-        height: 541
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: bc369b9b5623ac644ae17f299ed477e8
-      internalID: -1953135449
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: titulosNeutral_1
-      rect:
-        serializedVersion: 2
-        x: 1428
-        y: 1080
-        width: 808
-        height: 473
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 919b07ba109e15543a30285bf8b859e9
-      internalID: -657022108
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: titulosNeutral_2
-      rect:
-        serializedVersion: 2
-        x: 936
-        y: 562
-        width: 1900
-        height: 497
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 35a91b0ae30f74b4ca30e9187dbea2c1
-      internalID: 2020381266
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     customData: 
     physicsShape: []
@@ -201,10 +135,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      titulosNeutral_0: -1953135449
-      titulosNeutral_1: -657022108
-      titulosNeutral_2: 2020381266
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

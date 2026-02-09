@@ -4860,7 +4860,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 733648025713326916, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
   m_PrefabInstance: {fileID: 9137903570050097017}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 9137903570050097018}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4e4a3d22412c124b8570d96f6bc9d69, type: 3}
@@ -7066,6 +7066,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
+--- !u!114 &8672810230289615310 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3948952901477141902, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
+  m_PrefabInstance: {fileID: 8672810230289615309}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &9137903570050097017
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7141,8 +7152,74 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9137903570050097022}
+    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9137903570050097021}
+    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9137903570050097020}
   m_SourcePrefab: {fileID: 100100000, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+--- !u!1 &9137903570050097018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+  m_PrefabInstance: {fileID: 9137903570050097017}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9137903570050097020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9137903570050097018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27915a303ba1a85448fdfdff4d17baf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InfluenceSliderSync
+--- !u!114 &9137903570050097021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9137903570050097018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1cafcee80f350a4ea7d0fe9502345aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SliderAnimado
+  slider: {fileID: 8672810230289615310}
+  duracionTransicion: 0.5
+  valorObjetivo: 0
+--- !u!114 &9137903570050097022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9137903570050097018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d912f0b3af725af4a872804447844d94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InfluenceUIController
+  titulo: {fileID: 0}
+  botonesBuenos:
+  - {fileID: 0}
+  botonesMalos: []
+  botonesNeutrales: []
+  titulosBuenos: []
+  titulosNeutrales: []
+  titulosMalos: []
+  tituloIndex: 0
+  concatenarTitulos: 0
+  textoCorrupto: Influencia Corrupta
+  textoNeutral: Influencia Neutral
+  textoLuminoso: "Influencia Lum\xEDnica"
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

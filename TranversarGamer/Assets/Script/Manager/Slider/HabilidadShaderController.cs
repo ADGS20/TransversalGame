@@ -1,30 +1,26 @@
-﻿//---------------Creador de este script-------------------------//
-//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
-//-------------------------------------------------------------//
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class HabilidadShaderController : MonoBehaviour
 {
     [Header("Configuración de Curación")]
-    public List<SpriteRenderer> objetosCuracion = new List<SpriteRenderer>(); // Objetos afectados por la curación
-    public Material materialCuracion;     // Material con shader de curación
-    public float duracionCuracion = 2f;   // Duración del efecto
+    public List<SpriteRenderer> objetosCuracion = new List<SpriteRenderer>();
+    public Material materialCuracion;
+    public float duracionCuracion = 2f;
 
     [Header("Configuración de Corrupción")]
-    public List<SpriteRenderer> objetosCorrupcion = new List<SpriteRenderer>(); // Objetos afectados por la corrupción
-    public Material materialCorrupcion;   // Material con shader de corrupción
+    public List<SpriteRenderer> objetosCorrupcion = new List<SpriteRenderer>();
+    public Material materialCorrupcion;
     public float duracionCorrupcion = 2f;
 
     [Header("UI")]
-    public GameObject canvasHabilidades;  // Canvas que muestra los botones de habilidad
-    public GameObject botonCuracion;      // Botón visible solo en zonas de curación
-    public GameObject botonCorrupcion;    // Botón visible solo en zonas de corrupción
+    public GameObject canvasHabilidades;
+    public GameObject botonCuracion;
+    public GameObject botonCorrupcion;
 
     [Header("Tipo de Zona")]
-    public TipoZona tipoZona;             // Define si esta zona es de curación o corrupción
+    public TipoZona tipoZona;
 
     public enum TipoZona
     {
@@ -34,14 +30,25 @@ public class HabilidadShaderController : MonoBehaviour
 
     void Update()
     {
-        // Permite cerrar el menú de habilidades con la tecla Escape
         if (Input.GetKeyDown(KeyCode.Escape) && canvasHabilidades != null && canvasHabilidades.activeSelf)
         {
             canvasHabilidades.SetActive(false);
         }
+
+        // Usar el estado global de influencia en lugar de buscar InfluenceUIController
+        if (InfluenceState.Instance != null)
+        {
+            var estado = InfluenceState.Instance.CurrentEstado;
+
+            // Ejemplo de uso: si quieres mostrar/ocultar botones según estado global
+            // (aquí solo se deja como referencia; no cambia la lógica de zona)
+            if (estado == InfluenceState.EstadoInfluencia.Corrupto)
+            {
+                // lógica específica si hace falta
+            }
+        }
     }
 
-    // Activa el shader de curación en todos los objetos asignados
     public void UsarHabilidadCuracion()
     {
         if (objetosCuracion.Count > 0 && materialCuracion != null)
@@ -51,7 +58,6 @@ public class HabilidadShaderController : MonoBehaviour
                 if (obj != null)
                 {
                     obj.material = materialCuracion;
-                    // El shader se anima desde invisible (1) a visible (0)
                     StartCoroutine(AnimarShader(obj.material, 1f, 0f, duracionCuracion));
                 }
             }
@@ -61,7 +67,6 @@ public class HabilidadShaderController : MonoBehaviour
             canvasHabilidades.SetActive(false);
     }
 
-    // Activa el shader de corrupción en todos los objetos asignados
     public void UsarHabilidadCorrupcion()
     {
         if (objetosCorrupcion.Count > 0 && materialCorrupcion != null)
@@ -71,7 +76,6 @@ public class HabilidadShaderController : MonoBehaviour
                 if (obj != null)
                 {
                     obj.material = materialCorrupcion;
-                    // El shader se anima desde visible (0) a invisible (1)
                     StartCoroutine(AnimarShader(obj.material, 0f, 1f, duracionCorrupcion));
                 }
             }
@@ -81,7 +85,6 @@ public class HabilidadShaderController : MonoBehaviour
             canvasHabilidades.SetActive(false);
     }
 
-    // Corrutina que anima el valor del shader "_DissolveAmount"
     IEnumerator AnimarShader(Material mat, float inicio, float fin, float duracion)
     {
         float tiempo = 0f;
@@ -89,17 +92,14 @@ public class HabilidadShaderController : MonoBehaviour
         while (tiempo < duracion)
         {
             tiempo += Time.deltaTime;
-
             float progreso = Mathf.Lerp(inicio, fin, tiempo / duracion);
             mat.SetFloat("_DissolveAmount", progreso);
-
             yield return null;
         }
 
         mat.SetFloat("_DissolveAmount", fin);
     }
 
-    // Cuando el jugador entra en la zona, se muestra el menú de habilidades
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -108,7 +108,6 @@ public class HabilidadShaderController : MonoBehaviour
             {
                 canvasHabilidades.SetActive(true);
 
-                // Mostrar solo el botón correspondiente al tipo de zona
                 if (tipoZona == TipoZona.Curacion)
                 {
                     if (botonCuracion != null) botonCuracion.SetActive(true);
@@ -123,7 +122,6 @@ public class HabilidadShaderController : MonoBehaviour
         }
     }
 
-    // Al salir de la zona, se oculta el menú
     void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
