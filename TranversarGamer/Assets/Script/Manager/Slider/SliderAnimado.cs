@@ -1,56 +1,72 @@
-//---------------Creador de este script-------------------------//
-//--------- Hecho por: Andres Diaz Guerrero Soto --------------//
-//-------------------------------------------------------------//
-
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SliderAnimado : MonoBehaviour
 {
-    public Slider slider;                 // Referencia al componente Slider
-    public float duracionTransicion = 0.5f; // Tiempo que tarda en alcanzar el valor objetivo
+    public Slider slider;
+    public float duracionTransicion = 0.5f;
 
     [HideInInspector]
-    public float valorObjetivo;           // Valor al que debe llegar el slider de forma suave
+    public float valorObjetivo;
 
-    private float velocidad = 0f;         // Velocidad usada por SmoothDamp
+    private float velocidad = 0f;
 
     void Awake()
     {
-        // Si no se asignó manualmente, se obtiene el Slider del mismo objeto
         if (slider == null)
-            slider = GetComponent<Slider>();
+            slider = GetComponent<Slider>() ?? GetComponentInChildren<Slider>();
 
-        // El valor objetivo inicial es el valor actual del slider
+        if (slider == null)
+        {
+            Debug.LogWarning("[SliderAnimado] No se encontró Slider en este GameObject. Este componente quedará inactivo hasta que se asigne un Slider.");
+            return;
+        }
+
+        slider.minValue = -100f;
+        slider.maxValue = 100f;
         valorObjetivo = slider.value;
+        Debug.Log($"[SliderAnimado] Awake -> slider.min={slider.minValue} max={slider.maxValue} value={slider.value}");
     }
+
 
     void Update()
     {
-        // Si la diferencia es significativa, suavizar el movimiento
+        if (slider == null) return;
+
+        // Debug para ver si algo limita el valor visual
+        // (puedes comentar estas líneas cuando ya esté todo correcto)
+        // Debug.Log($"[SliderAnimado] Update -> slider.value={slider.value} objetivo={valorObjetivo}");
+
         if (Mathf.Abs(slider.value - valorObjetivo) > 0.01f)
         {
-            slider.value = Mathf.SmoothDamp(
-                slider.value,
-                valorObjetivo,
-                ref velocidad,
-                duracionTransicion
-            );
+            slider.value = Mathf.SmoothDamp(slider.value, valorObjetivo, ref velocidad, duracionTransicion);
         }
         else
         {
-            // Si ya está cerca, fijar el valor exacto
             slider.value = valorObjetivo;
+            velocidad = 0f;
         }
     }
 
-    // Cambia el valor objetivo del slider dentro de sus límites
+    // Cambia el objetivo y aplica inmediatamente al slider (evita quedarse a mitad)
     public void SetValor(float nuevoValor)
     {
-        valorObjetivo = Mathf.Clamp(nuevoValor, slider.minValue, slider.maxValue);
+        float clamped = Mathf.Clamp(nuevoValor, -100f, 100f);
+        valorObjetivo = clamped;
+
+        if (slider == null)
+        {
+            Debug.Log($"[SliderAnimado] SetValor guardado objetivo (no hay Slider): {valorObjetivo}");
+            return;
+        }
+
+        // Aplicar inmediatamente el valor final para evitar artefactos visuales
+        slider.value = valorObjetivo;
+        velocidad = 0f;
+
+        Debug.Log($"[SliderAnimado] SetValor -> aplicado slider.value={slider.value} objetivo={valorObjetivo}");
     }
 
-    // Suma o resta un valor al objetivo
     public void SumarValor(float cantidad)
     {
         SetValor(valorObjetivo + cantidad);

@@ -1059,6 +1059,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: InfluenceState
       objectReference: {fileID: 0}
+    - target: {fileID: 8880749188946381835, guid: e917705ad04345e42a49dce89e4948cf, type: 3}
+      propertyPath: resetOnStart
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9065016848411363461, guid: e917705ad04345e42a49dce89e4948cf, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1.65755
@@ -1338,11 +1342,11 @@ MonoBehaviour:
   botonesNeutrales:
   - {fileID: 0}
   titulosBuenos:
-  - titulos_Natural
+  - {fileID: 1793980338}
   titulosNeutrales:
-  - titulos_Neutral
+  - {fileID: 842696847}
   titulosMalos:
-  - titulos_Corrompido
+  - {fileID: 155108809}
   tituloIndex: 0
   concatenarTitulos: 0
   textoCorrupto: Influencia Corrupta

@@ -5,31 +5,41 @@ using System.Collections.Generic;
 public class InfluenceUIController : MonoBehaviour
 {
     [Header("UI")]
-    public Text titulo;
+    public Text titulo; // si quieres mantener un texto además de la imagen (opcional)
 
     [Header("Botones por estado")]
     public List<GameObject> botonesBuenos = new List<GameObject>();
     public List<GameObject> botonesMalos = new List<GameObject>();
     public List<GameObject> botonesNeutrales = new List<GameObject>();
 
-    [Header("Títulos por estado (listas)")]
-    [Tooltip("Lista de títulos posibles para estado Luminoso. Se elige por index o el primero si el index no existe.")]
-    public List<string> titulosBuenos = new List<string>();
-    [Tooltip("Lista de títulos posibles para estado Neutral.")]
-    public List<string> titulosNeutrales = new List<string>();
-    [Tooltip("Lista de títulos posibles para estado Corrupto.")]
-    public List<string> titulosMalos = new List<string>();
+    [Header("Imágenes de título por estado (arrastrar Image components)")]
+    public List<Image> titulosBuenos = new List<Image>();
+    public List<Image> titulosNeutrales = new List<Image>();
+    public List<Image> titulosMalos = new List<Image>();
 
     [Header("Selección de título")]
-    [Tooltip("Índice usado para elegir el título dentro de la lista. Si está fuera de rango se usa el primero.")]
     public int tituloIndex = 0;
-    [Tooltip("Si está activado, concatena todos los títulos de la lista separados por ' - ' en lugar de elegir uno.")]
-    public bool concatenarTitulos = false;
+    public bool concatenarTitulos = false; // si quieres mostrar varias imágenes a la vez
 
-    [Header("Textos por defecto (si las listas están vacías)")]
+    [Header("Textos por defecto (si quieres usar texto además de imagen)")]
     public string textoCorrupto = "Influencia Corrupta";
     public string textoNeutral = "Influencia Neutral";
     public string textoLuminoso = "Influencia Lumínica";
+
+
+    void Start()
+    {
+        SetImagenes(titulosBuenos, false);
+        SetImagenes(titulosNeutrales, false);
+        SetImagenes(titulosMalos, false);
+
+        if (InfluenceState.Instance != null)
+            AplicarEstado(InfluenceState.Instance.CurrentEstado);
+        else
+            InfluenceState.EnsureInstance(); // opcional: crear para sincronizar
+    }
+
+
 
     void OnEnable()
     {
@@ -48,51 +58,64 @@ public class InfluenceUIController : MonoBehaviour
 
     void AplicarEstado(InfluenceState.EstadoInfluencia estado)
     {
-        // Ocultar todo primero
+        Debug.Log($"[InfluenceUIController] AplicarEstado: {estado}");
+
         SetLista(botonesBuenos, false);
         SetLista(botonesMalos, false);
         SetLista(botonesNeutrales, false);
 
-        // Aplicar botones y título según estado
+        // Ocultar todas las imágenes de título primero
+        SetImagenes(titulosBuenos, false);
+        SetImagenes(titulosNeutrales, false);
+        SetImagenes(titulosMalos, false);
+
         switch (estado)
         {
             case InfluenceState.EstadoInfluencia.Corrupto:
                 SetLista(botonesMalos, true);
-                SetTitulo(GetTituloFromList(titulosMalos, textoCorrupto));
+                MostrarTitulos(titulosMalos, textoCorrupto);
                 break;
 
             case InfluenceState.EstadoInfluencia.Neutral:
                 SetLista(botonesNeutrales, true);
-                SetTitulo(GetTituloFromList(titulosNeutrales, textoNeutral));
+                MostrarTitulos(titulosNeutrales, textoNeutral);
                 break;
 
             case InfluenceState.EstadoInfluencia.Luminoso:
                 SetLista(botonesBuenos, true);
-                SetTitulo(GetTituloFromList(titulosBuenos, textoLuminoso));
+                MostrarTitulos(titulosBuenos, textoLuminoso);
                 break;
         }
     }
 
-    string GetTituloFromList(List<string> lista, string fallback)
+    void MostrarTitulos(List<Image> lista, string fallbackText)
     {
-        if (titulo == null) return fallback;
-
         if (lista == null || lista.Count == 0)
-            return fallback;
+        {
+            if (titulo != null) titulo.text = fallbackText;
+            return;
+        }
 
         if (concatenarTitulos)
-            return string.Join(" - ", lista);
+        {
+            // activar todas las imágenes de la lista
+            SetImagenes(lista, true);
+            if (titulo != null) titulo.text = ""; // opcional
+            return;
+        }
 
-        if (tituloIndex >= 0 && tituloIndex < lista.Count)
-            return lista[tituloIndex];
+        int idx = (tituloIndex >= 0 && tituloIndex < lista.Count) ? tituloIndex : 0;
+        SetImagenes(lista, false);
+        if (lista[idx] != null) lista[idx].gameObject.SetActive(true);
 
-        return lista[0];
+        if (titulo != null) titulo.text = ""; // opcional: dejar texto vacío si se usa imagen
     }
 
-    void SetTitulo(string texto)
+    void SetImagenes(List<Image> lista, bool activo)
     {
-        if (titulo != null)
-            titulo.text = texto;
+        if (lista == null) return;
+        foreach (var img in lista)
+            if (img != null) img.gameObject.SetActive(activo);
     }
 
     void SetLista(List<GameObject> lista, bool activo)

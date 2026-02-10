@@ -84,18 +84,24 @@ public class EleccionInfluencias : MonoBehaviour
         }
     }
 
-    // Eleccion buena
     public void EleccionBuena()
     {
-        InfluenceState.Instance.ModifyValue(30f);
-        canvasEleccion.SetActive(false);
+        var state = InfluenceState.EnsureInstance();
+        if (state != null) state.ModifyValue(30f);
+        else Debug.LogWarning("[EleccionInfluencias] InfluenceState no disponible en EleccionBuena.");
+
+        if (canvasEleccion != null) canvasEleccion.SetActive(false);
+        else Debug.LogWarning("[EleccionInfluencias] canvasEleccion no asignado.");
     }
 
-    // Eleccion mala
     public void EleccionMala()
     {
-        InfluenceState.Instance.ModifyValue(-30f);
-        canvasEleccion.SetActive(false);
+        var state = InfluenceState.EnsureInstance();
+        if (state != null) state.ModifyValue(-30f);
+        else Debug.LogWarning("[EleccionInfluencias] InfluenceState no disponible en EleccionMala.");
+
+        if (canvasEleccion != null) canvasEleccion.SetActive(false);
+        else Debug.LogWarning("[EleccionInfluencias] canvasEleccion no asignado.");
     }
 
 
