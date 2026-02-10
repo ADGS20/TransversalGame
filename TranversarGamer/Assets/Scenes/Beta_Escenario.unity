@@ -368,17 +368,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camaraOrbital: {fileID: 1367608013}
---- !u!114 &121179144 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1721501996791103104, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
-  m_PrefabInstance: {fileID: 8672810230289615309}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1cafcee80f350a4ea7d0fe9502345aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &128720954
 GameObject:
   m_ObjectHideFlags: 0
@@ -1012,7 +1001,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf3b4cee271a95439f4d74afea2a70a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sliderAnimado: {fileID: 121179144}
+  sliderAnimado: {fileID: 0}
   canvasEleccion: {fileID: 226962847}
   scriptMovimientoJugador: {fileID: 332338465}
   gameplayManager: {fileID: 1598424367}
@@ -4860,7 +4849,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 733648025713326916, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
   m_PrefabInstance: {fileID: 9137903570050097017}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9137903570050097018}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4e4a3d22412c124b8570d96f6bc9d69, type: 3}
@@ -7259,16 +7248,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1721501996791103104, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 459079731395171185, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
-      insertIndex: -1
+      insertIndex: 1
       addedObject: {fileID: 8672810230289615315}
     - targetCorrespondingSourceObject: {fileID: 459079731395171185, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8672810230289615314}
+      addedObject: {fileID: 8672810230289615316}
+    - targetCorrespondingSourceObject: {fileID: 459079731395171185, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8672810230289615317}
   m_SourcePrefab: {fileID: 100100000, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
 --- !u!114 &8672810230289615310 stripped
 MonoBehaviour:
@@ -7286,20 +7279,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 459079731395171185, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
   m_PrefabInstance: {fileID: 8672810230289615309}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8672810230289615314
+--- !u!114 &8672810230289615312 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 355995101852120387, guid: 3fc981a06bdc15b40a8593afe3bcf375, type: 3}
+  m_PrefabInstance: {fileID: 8672810230289615309}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8672810230289615311}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30e66edb73835d34cba0055277890946, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InfluenceSliderForceFill
-  slider: {fileID: 8672810230289615310}
-  forceFilledImage: 1
+  m_EditorClassIdentifier: 
 --- !u!114 &8672810230289615315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7314,6 +7304,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InfluenceSliderFix
   slider: {fileID: 8672810230289615310}
   forceImageFilled: 0
+--- !u!114 &8672810230289615316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8672810230289615311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27915a303ba1a85448fdfdff4d17baf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InfluenceSliderSync
+  slider: {fileID: 8672810230289615310}
+  fillImage: {fileID: 8672810230289615312}
+  velocidadAnimacion: 5
+--- !u!114 &8672810230289615317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8672810230289615311}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1cafcee80f350a4ea7d0fe9502345aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slider: {fileID: 8672810230289615310}
+  duracionTransicion: 0.5
+  valorObjetivo: 0
 --- !u!1001 &9006119903626169971
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7450,46 +7470,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9137903570050097021}
-    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9137903570050097020}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
---- !u!1 &9137903570050097018 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
-  m_PrefabInstance: {fileID: 9137903570050097017}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &9137903570050097020
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9137903570050097018}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27915a303ba1a85448fdfdff4d17baf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InfluenceSliderSync
---- !u!114 &9137903570050097021
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9137903570050097018}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1cafcee80f350a4ea7d0fe9502345aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SliderAnimado
-  slider: {fileID: 8672810230289615310}
-  duracionTransicion: 0.5
-  valorObjetivo: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

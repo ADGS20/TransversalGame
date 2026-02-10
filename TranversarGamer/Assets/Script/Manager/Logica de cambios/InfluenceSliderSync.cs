@@ -1,59 +1,92 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(SliderAnimado))]
 public class InfluenceSliderSync : MonoBehaviour
 {
-    SliderAnimado sliderAnimado;
+    [Header("Referencias UI")]
+    public Slider slider;       // Arrastra el componente Slider
+    public Image fillImage;     // Arrastra la imagen "Fill"
 
-    void Awake()
+    [Header("Configuración de Animación")]
+    [Range(1f, 20f)]
+    public float velocidadAnimacion = 5f;
+
+    // Variables internas
+    private float valorVisualActual;
+    private float valorObjetivoReal;
+
+    private void Awake()
     {
-        sliderAnimado = GetComponent<SliderAnimado>();
+        if (slider == null) slider = GetComponent<Slider>();
+
+        // Auto-corrección de configuración
+        if (slider != null)
+        {
+            slider.minValue = -100f;
+            slider.maxValue = 100f;
+            slider.wholeNumbers = false;
+            // Quitamos la interactividad para que el usuario no pueda arrastrarla
+            slider.interactable = false;
+
+            // Desconectar control nativo de Unity para evitar parpadeos
+            if (fillImage != null && slider.fillRect == fillImage.rectTransform)
+            {
+                slider.fillRect = null;
+            }
+        }
     }
 
-    void OnEnable()
+    private void Start()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-
-        if (sliderAnimado == null)
-        {
-            Debug.LogWarning("[InfluenceSliderSync] No hay SliderAnimado en este GameObject.");
-            return;
-        }
-
         if (InfluenceState.Instance != null)
         {
-            sliderAnimado.SetValor(InfluenceState.Instance.Value);
-            InfluenceState.Instance.OnValueChanged += OnInfluenceChanged;
+            valorObjetivoReal = InfluenceState.Instance.currentInfluence;
+            valorVisualActual = valorObjetivoReal; // Empezamos ya en el sitio
+
+            InfluenceState.Instance.OnEstadoChanged += AlCambiarInfluencia;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (InfluenceState.Instance != null)
+            InfluenceState.Instance.OnEstadoChanged -= AlCambiarInfluencia;
+    }
+
+    private void AlCambiarInfluencia(float nuevoValor)
+    {
+        valorObjetivoReal = nuevoValor;
+    }
+
+    private void Update()
+    {
+        if (slider == null) return;
+
+        // 1. CÁLCULO: Acercar el valor visual al objetivo
+        if (Mathf.Abs(valorVisualActual - valorObjetivoReal) > 0.01f)
+        {
+            valorVisualActual = Mathf.Lerp(valorVisualActual, valorObjetivoReal, Time.deltaTime * velocidadAnimacion);
         }
         else
         {
-            Debug.LogWarning("[InfluenceSliderSync] InfluenceState.Instance es null al habilitar.");
+            valorVisualActual = valorObjetivoReal;
         }
+
+        // 2. APLICACIÓN: Forzar SIEMPRE los valores visuales (Bloquea interferencias)
+        ActualizarVisuales(valorVisualActual);
     }
 
-    void OnDisable()
+    private void ActualizarVisuales(float valor)
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        // Mover la bolita (Handle)
+        slider.value = valor;
 
-        if (InfluenceState.Instance != null)
-            InfluenceState.Instance.OnValueChanged -= OnInfluenceChanged;
-    }
-
-    void OnInfluenceChanged(float nuevo)
-    {
-        if (sliderAnimado == null) return;
-        sliderAnimado.SetValor(nuevo);
-    }
-
-    // Si la escena se carga y este objeto persiste o se crea después, forzamos sincronía
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        if (sliderAnimado == null) return;
-
-        if (InfluenceState.Instance != null)
+        // Mover la barra de color (Fill) manualmente
+        if (fillImage != null)
         {
-            sliderAnimado.SetValor(InfluenceState.Instance.Value);
+            float rangoTotal = slider.maxValue - slider.minValue; // 200
+            float porcentaje = (valor - slider.minValue) / rangoTotal;
+            fillImage.fillAmount = porcentaje;
         }
     }
 }

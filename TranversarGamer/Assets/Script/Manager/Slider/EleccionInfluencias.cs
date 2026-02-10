@@ -31,7 +31,7 @@ public class EleccionInfluencias : MonoBehaviour
             // Si no se encontró por tag, buscar cualquier instancia en la escena
             if (scriptMovimientoJugador == null)
             {
-                scriptMovimientoJugador = Object.FindFirstObjectByType<Mov_Player3D>();
+                scriptMovimientoJugador = UnityEngine.Object.FindFirstObjectByType<Mov_Player3D>();
             }
 
             if (scriptMovimientoJugador == null)
@@ -43,7 +43,7 @@ public class EleccionInfluencias : MonoBehaviour
         // Buscar automáticamente el GameplayManager si no está asignado
         if (gameplayManager == null)
         {
-            gameplayManager = Object.FindFirstObjectByType<GameplayManager>();
+            gameplayManager = UnityEngine.Object.FindFirstObjectByType<GameplayManager>();
             if (gameplayManager == null)
             {
                 Debug.LogWarning("EleccionInfluencias: No se encontró GameplayManager automáticamente.");
