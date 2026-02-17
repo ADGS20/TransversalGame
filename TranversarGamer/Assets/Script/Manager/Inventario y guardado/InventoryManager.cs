@@ -1,31 +1,62 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    public static InventoryManager Instance; // Singleton para acceso fácil
+    public static InventoryManager Instance;
 
-    // Lista de los objetos que el jugador tiene actualmente
     public List<ItemData> objetosRecogidos = new List<ItemData>();
+
+    // NUEVO: Guardará los IDs de los objetos del mapa que recojamos
+    public List<string> objetosDestruidosMundo = new List<string>();
+
+    [Header("Interfaz de Usuario")]
+    public GameObject panelInventario;
+    public GameObject prefabIconoItem;
+    public Transform contenedorDeIconos;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            if (panelInventario != null) DontDestroyOnLoad(panelInventario.transform.root.gameObject);
+        }
         else Destroy(gameObject);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            if (panelInventario != null)
+            {
+                bool estadoNuevo = !panelInventario.activeSelf;
+                panelInventario.SetActive(estadoNuevo);
+
+                if (estadoNuevo == true) Time.timeScale = 0f;
+                else Time.timeScale = 1f;
+            }
+        }
     }
 
     public void AgregarItem(ItemData item)
     {
         objetosRecogidos.Add(item);
         Debug.Log($"Item añadido: {item.nombre}");
-        // Aquí llamarías a una función para actualizar la UI visualmente
+
+        if (prefabIconoItem != null && contenedorDeIconos != null)
+        {
+            GameObject nuevoIcono = Instantiate(prefabIconoItem, contenedorDeIconos);
+            Image imagenUI = nuevoIcono.GetComponent<Image>();
+            if (imagenUI != null && item.icono != null) imagenUI.sprite = item.icono;
+        }
     }
 
     public void EliminarItem(ItemData item)
     {
-        if (objetosRecogidos.Contains(item))
-        {
-            objetosRecogidos.Remove(item);
-        }
+        if (objetosRecogidos.Contains(item)) objetosRecogidos.Remove(item);
     }
 }

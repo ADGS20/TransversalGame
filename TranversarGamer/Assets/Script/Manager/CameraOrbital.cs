@@ -287,4 +287,26 @@ public class CameraOrbital : MonoBehaviour
         float yawRad = anguloActual * Mathf.Deg2Rad;
         return new Vector3(Mathf.Cos(yawRad), 0, -Mathf.Sin(yawRad));
     }
+
+    // --- NUEVAS FUNCIONES PARA EL GUARDADO ---
+    public float ObtenerAngulo()
+    {
+        return anguloObjetivo; // Le pasamos la rotación actual al SaveSystem
+    }
+
+    public float ObtenerZoom()
+    {
+        return zoomFactorObjetivo; // Le pasamos el zoom actual al SaveSystem
+    }
+
+    public void CargarDatosCamara(float anguloGuardado, float zoomGuardado)
+    {
+        // Al cargar la partida, aplicamos la rotación y zoom del archivo
+        anguloObjetivo = anguloGuardado;
+        anguloActual = anguloGuardado;
+
+        zoomFactorObjetivo = zoomGuardado;
+        zoomFactorActual = zoomGuardado;
+    }
+
 }
