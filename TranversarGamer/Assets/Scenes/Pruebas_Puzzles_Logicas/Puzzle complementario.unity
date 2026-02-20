@@ -1213,6 +1213,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -44.741
       objectReference: {fileID: 0}
+    - target: {fileID: 5495468747390953019, guid: c7aa85ff855026746ab488209190f5d2, type: 3}
+      propertyPath: m_text
+      value: Siguiente nivel
+      objectReference: {fileID: 0}
     - target: {fileID: 7570067610308408582, guid: c7aa85ff855026746ab488209190f5d2, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.7336
