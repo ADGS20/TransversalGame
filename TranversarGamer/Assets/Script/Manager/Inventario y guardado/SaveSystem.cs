@@ -1,51 +1,97 @@
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement; // NUEVO: Necesario para leer el Nivel actual
+using UnityEngine.SceneManagement;
 
 public class SaveSystem : MonoBehaviour
 {
-    [Header("Referencias del Jugador")]
+    [Header("Referencias (Se autocompletan solas)")]
     public Transform jugador;
     public CameraOrbital camaraOrbital;
-
-    [Header("Feedback Visual")]
-    [Tooltip("Arrastra aquí el texto o panel que dirá 'Partida Guardada'")]
     public GameObject cartelGuardado;
 
-    // Aquí guardaremos las decisiones temporalmente mientras jugamos
     public List<int> decisionesActuales = new List<int>();
-
     private string savePath;
 
     private void Awake()
     {
         savePath = Path.Combine(Application.persistentDataPath, "savegame.json");
-
-        // Nos aseguramos de que el cartel empiece apagado al abrir el juego
         if (cartelGuardado != null) cartelGuardado.SetActive(false);
     }
 
+    // --- NUEVO: ESTO DETECTA CUANDO CAMBIAS DE ESCENA ---
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += AlCargarEscena; // Nos suscribimos al evento
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= AlCargarEscena; // Nos desuscribimos para evitar errores
+    }
+
+    // Esta función se ejecuta AUTOMÁTICAMENTE cada vez que entras a un nivel nuevo
+    void AlCargarEscena(Scene scene, LoadSceneMode mode)
+    {
+        // Solo buscamos si no estamos en el menú principal (asumiendo que menú es índice 0)
+        if (scene.buildIndex != 0)
+        {
+            BuscarReferencias();
+        }
+
+        // Si había una carga pendiente (la "nota" del menú), cargamos ahora
+        if (PlayerPrefs.GetInt("CargarPartidaPendiente", 0) == 1)
+        {
+            PlayerPrefs.SetInt("CargarPartidaPendiente", 0);
+            CargarJuego();
+        }
+    }
+
+    // --- LA MAGIA: EL SABUESO ---
+    public void BuscarReferencias()
+    {
+        // 1. Buscar al Jugador por su ETIQUETA (Tag)
+        GameObject jugadorEncontrado = GameObject.FindGameObjectWithTag("Player");
+        if (jugadorEncontrado != null)
+        {
+            jugador = jugadorEncontrado.transform;
+        }
+
+        // 2. Buscar la Cámara Orbital (NUEVO MÉTODO UNITY 6)
+        camaraOrbital = FindFirstObjectByType<CameraOrbital>();
+
+        // 3. (Opcional) Buscar el Cartel de Guardado si se perdió
+        if (cartelGuardado == null)
+        {
+            GameObject cartel = GameObject.Find("TextoGuardado");
+            if (cartel != null) cartelGuardado = cartel;
+        }
+    }
+    // -----------------------------------------------------
+
     private void Start()
     {
-        CargarJuego();
+        // Ejecutamos la búsqueda también al arrancar por si acaso
+        BuscarReferencias();
     }
 
     public void GuardarJuego()
     {
-        GameData data = new GameData();
+        // Asegurarnos de tener referencias antes de guardar
+        if (jugador == null) BuscarReferencias();
 
-        // 1. Guardar Nivel Dinámico (Lee el número de la escena actual)
+        GameData data = new GameData();
         data.nivelCompletado = SceneManager.GetActiveScene().buildIndex;
 
-        // 2. Guardar Inventario y Objetos destruidos
-        foreach (var item in InventoryManager.Instance.objetosRecogidos)
+        if (InventoryManager.Instance != null)
         {
-            data.inventarioIDs.Add(item.id);
+            foreach (var item in InventoryManager.Instance.objetosRecogidos)
+            {
+                data.inventarioIDs.Add(item.id);
+            }
+            data.objetosDestruidosMundo = new List<string>(InventoryManager.Instance.objetosDestruidosMundo);
         }
-        data.objetosDestruidosMundo = new List<string>(InventoryManager.Instance.objetosDestruidosMundo);
 
-        // 3. Guardar Posición del Jugador
         if (jugador != null)
         {
             data.posicionX = jugador.position.x;
@@ -53,26 +99,22 @@ public class SaveSystem : MonoBehaviour
             data.posicionZ = jugador.position.z;
         }
 
-        // 4. Guardar Lógica de la Cámara
         if (camaraOrbital != null)
         {
             data.camaraAngulo = camaraOrbital.ObtenerAngulo();
             data.camaraZoom = camaraOrbital.ObtenerZoom();
         }
 
-        // 5. Guardar Decisiones (Misiones, cofres, jefes)
         data.decisionesTomadas = new List<int>(decisionesActuales);
 
-        // ESCRIBIR EN EL DISCO
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(savePath, json);
-        Debug.Log("Partida guardada en el Nivel: " + data.nivelCompletado);
+        Debug.Log("Partida guardada en Nivel: " + data.nivelCompletado);
 
-        // --- FEEDBACK VISUAL PARA EL JUGADOR ---
         if (cartelGuardado != null)
         {
-            cartelGuardado.SetActive(true); // Encendemos el mensaje
-            Invoke("OcultarCartel", 2f);    // Lo apagamos después de 2 segundos
+            cartelGuardado.SetActive(true);
+            Invoke("OcultarCartel", 2f);
         }
     }
 
@@ -88,19 +130,32 @@ public class SaveSystem : MonoBehaviour
             string json = File.ReadAllText(savePath);
             GameData data = JsonUtility.FromJson<GameData>(json);
 
-            // Cargar inventario y objetos destruidos
-            InventoryManager.Instance.objetosRecogidos.Clear();
-            foreach (Transform hijo in InventoryManager.Instance.contenedorDeIconos) Destroy(hijo.gameObject);
-            InventoryManager.Instance.objetosDestruidosMundo = new List<string>(data.objetosDestruidosMundo);
-
-            ItemData[] todosLosItemsPosibles = Resources.LoadAll<ItemData>("Items");
-            foreach (string idGuardado in data.inventarioIDs)
+            // Lógica de cambio de escena si estamos en el menú
+            if (SceneManager.GetActiveScene().buildIndex != data.nivelCompletado)
             {
-                ItemData itemEncontrado = System.Array.Find(todosLosItemsPosibles, item => item.id == idGuardado);
-                if (itemEncontrado != null) InventoryManager.Instance.AgregarItem(itemEncontrado);
+                PlayerPrefs.SetInt("CargarPartidaPendiente", 1);
+                SceneManager.LoadScene(data.nivelCompletado);
+                return;
             }
 
-            // Cargar posición
+            // --- APLICAR DATOS ---
+            // Nos aseguramos DE NUEVO de que tenemos al jugador localizado
+            if (jugador == null) BuscarReferencias();
+
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.objetosRecogidos.Clear();
+                foreach (Transform hijo in InventoryManager.Instance.contenedorDeIconos) Destroy(hijo.gameObject);
+                InventoryManager.Instance.objetosDestruidosMundo = new List<string>(data.objetosDestruidosMundo);
+
+                ItemData[] todosLosItemsPosibles = Resources.LoadAll<ItemData>("Items");
+                foreach (string idGuardado in data.inventarioIDs)
+                {
+                    ItemData itemEncontrado = System.Array.Find(todosLosItemsPosibles, item => item.id == idGuardado);
+                    if (itemEncontrado != null) InventoryManager.Instance.AgregarItem(itemEncontrado);
+                }
+            }
+
             if (jugador != null)
             {
                 CharacterController cc = jugador.GetComponent<CharacterController>();
@@ -110,54 +165,41 @@ public class SaveSystem : MonoBehaviour
                 if (cc != null) cc.enabled = true;
             }
 
-            // Cargar cámara
-            if (camaraOrbital != null)
-            {
-                camaraOrbital.CargarDatosCamara(data.camaraAngulo, data.camaraZoom);
-            }
-
-            // Cargar decisiones
+            if (camaraOrbital != null) camaraOrbital.CargarDatosCamara(data.camaraAngulo, data.camaraZoom);
             decisionesActuales = new List<int>(data.decisionesTomadas);
 
-            Debug.Log("Partida Cargada automáticamente. Nivel actual: " + data.nivelCompletado);
+            Debug.Log("Partida Cargada. Referencias reconectadas.");
         }
     }
 
     public void NuevaPartida()
     {
         if (File.Exists(savePath)) File.Delete(savePath);
-        InventoryManager.Instance.objetosRecogidos.Clear();
-        InventoryManager.Instance.objetosDestruidosMundo.Clear();
-        foreach (Transform hijo in InventoryManager.Instance.contenedorDeIconos) Destroy(hijo.gameObject);
 
-        decisionesActuales.Clear(); // Limpiamos las decisiones
-
-        if (jugador != null)
+        if (InventoryManager.Instance != null)
         {
-            CharacterController cc = jugador.GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-            jugador.position = new Vector3(0f, 0f, 0f);
-            Physics.SyncTransforms();
-            if (cc != null) cc.enabled = true;
+            InventoryManager.Instance.objetosRecogidos.Clear();
+            InventoryManager.Instance.objetosDestruidosMundo.Clear();
+            foreach (Transform hijo in InventoryManager.Instance.contenedorDeIconos) Destroy(hijo.gameObject);
         }
+        decisionesActuales.Clear();
 
-        if (camaraOrbital != null) camaraOrbital.CargarDatosCamara(0f, 0.5f);
-    }
-
-    // --- NUEVAS HERRAMIENTAS PARA MISIONES / EVENTOS ---
-
-    // Llama a esto cuando el jugador haga algo importante (ej: matar al jefe 1)
-    public void GuardarDecision(int idDecision)
-    {
-        if (!decisionesActuales.Contains(idDecision))
+        // Si estamos en el menú, cargar nivel 1
+        if (SceneManager.GetActiveScene().buildIndex == 0)
         {
-            decisionesActuales.Add(idDecision);
+            SceneManager.LoadScene(1);
         }
-    }
-
-    // Llama a esto para preguntar si ya hizo algo (ej: ¿ya habló con el rey?)
-    public bool YaTomoDecision(int idDecision)
-    {
-        return decisionesActuales.Contains(idDecision);
+        else
+        {
+            // Si ya estamos jugando, reseteamos posición
+            if (jugador == null) BuscarReferencias();
+            if (jugador != null)
+            {
+                CharacterController cc = jugador.GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+                jugador.position = Vector3.zero;
+                if (cc != null) cc.enabled = true;
+            }
+        }
     }
 }

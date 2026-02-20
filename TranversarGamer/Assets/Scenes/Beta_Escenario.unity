@@ -7390,6 +7390,10 @@ PrefabInstance:
       propertyPath: pauseUI
       value: 
       objectReference: {fileID: 3963398236628696287}
+    - target: {fileID: 4109259737978504342, guid: 7c3dc06952cc19447b3ed75b528596b7, type: 3}
+      propertyPath: mainMenuSceneName
+      value: Puzzle complementario
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

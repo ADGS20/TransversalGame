@@ -3,6 +3,7 @@
 //-------------------------------------------------------------//
 
 using UnityEngine;
+using UnityEngine.SceneManagement; 
 
 /// <summary>
 /// Gestiona el cambio entre el jugador principal y el compañero.
@@ -35,6 +36,10 @@ public class GameplayManager : MonoBehaviour
 
     void Start()
     {
+
+        // También lo ejecutamos al arrancar el juego por primera vez
+        BuscarReferencias();
+
         // Buscar cámara orbital si no está asignada
         if (camaraOrbital == null)
         {
@@ -225,4 +230,44 @@ public class GameplayManager : MonoBehaviour
                 companionController.DesactivarControl();
         }
     }
+
+    // --- INICIO DEL SABUESO AUTOMÁTICO ---
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += AlCargarEscena; // Avisa cuando cargamos nivel
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= AlCargarEscena;
+    }
+
+    private void AlCargarEscena(Scene scene, LoadSceneMode mode)
+    {
+        BuscarReferencias();
+    }
+
+    public void BuscarReferencias()
+    {
+        // 1. Busca al Jugador Principal en el nuevo mapa
+        scriptJugadorPrincipal = FindFirstObjectByType<Mov_Player3D>();
+        if (scriptJugadorPrincipal != null)
+        {
+            rbJugadorPrincipal = scriptJugadorPrincipal.GetComponent<Rigidbody>();
+        }
+
+        // 2. Busca al Compañero (Mascota) en el nuevo mapa
+        companionController = FindFirstObjectByType<CompainController>();
+        if (companionController != null)
+        {
+            rbCompanion = companionController.GetComponent<Rigidbody>();
+        }
+
+        // 3. Busca la nueva Cámara Orbital
+        camaraOrbital = FindFirstObjectByType<CameraOrbital>();
+    }
+
+
+
+
 }

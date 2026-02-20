@@ -6,11 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/StartScreen.unity
+    guid: 6bc73b952580639439986f8dd16a0e67
+  - enabled: 1
     path: Assets/Scenes/Beta_Escenario.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/StartScreen.unity
-    guid: 6bc73b952580639439986f8dd16a0e67
+    path: Assets/Scenes/Pruebas_Puzzles_Logicas/Puzzle complementario.unity
+    guid: 240e51dbea18d084a9b1ecfafd724169
+  - enabled: 1
+    path: Assets/Scenes/Pruebas_Puzzles_Logicas/Prueba_Inventario_Guardado.unity
+    guid: 8ea51b126263aa74a9b73d1165452362
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
