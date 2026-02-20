@@ -2,6 +2,7 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class SaveSystem : MonoBehaviour
 {
@@ -116,6 +117,21 @@ public class SaveSystem : MonoBehaviour
             cartelGuardado.SetActive(true);
             Invoke("OcultarCartel", 2f);
         }
+
+        if (cartelGuardado != null)
+        {
+            cartelGuardado.SetActive(true);
+            // Usamos una Corrutina para ignorar la pausa del juego
+            StartCoroutine(ApagarCartelRealtime());
+        }
+
+    }
+
+    private IEnumerator ApagarCartelRealtime()
+    {
+        // Espera 2 segundos de la vida real, aunque el juego esté en Pausa
+        yield return new WaitForSecondsRealtime(2f);
+        if (cartelGuardado != null) cartelGuardado.SetActive(false);
     }
 
     private void OcultarCartel()

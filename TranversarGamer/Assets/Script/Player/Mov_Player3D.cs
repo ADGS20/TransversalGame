@@ -59,7 +59,7 @@ public class Mov_Player3D : MonoBehaviour
 
         // Buscar InputHandler si no está asignado
         if (input == null)
-            input = FindObjectOfType<InputHandler>();
+            input = FindFirstObjectByType<InputHandler>();
     }
 
     void Update()

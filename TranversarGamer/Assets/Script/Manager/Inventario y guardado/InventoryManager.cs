@@ -42,6 +42,26 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    // Esta función nos dirá desde otros scripts si el inventario está abierto
+    public bool EstaInventarioAbierto()
+    {
+        if (panelInventario != null)
+        {
+            return panelInventario.activeSelf;
+        }
+        return false;
+    }
+
+    // Esta función permite que el menú de Pausa cierre el inventario a la fuerza
+    public void CerrarInventario()
+    {
+        if (panelInventario != null)
+        {
+            panelInventario.SetActive(false);
+            Time.timeScale = 1f; // Reanudamos el tiempo
+        }
+    }
+
     public void AgregarItem(ItemData item)
     {
         objetosRecogidos.Add(item);
