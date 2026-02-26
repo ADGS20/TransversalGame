@@ -61,6 +61,7 @@ GameObject:
   - component: {fileID: 733648025713326916}
   - component: {fileID: 3181428360533566895}
   - component: {fileID: 1343429140052893092}
+  - component: {fileID: 1829829963504032152}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -134,3 +135,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputActions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+--- !u!114 &1829829963504032152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7037566278894033860}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd624105b0601cb43bdc9de288e47c03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimModeController
+  camaraOrbital: {fileID: 0}
+  fpsCamera: {fileID: 0}
+  playerMovement: {fileID: 0}
+  firePoint: {fileID: 0}
+  stonePrefab: {fileID: 0}
+  fuerzaDisparo: 15
+  jugadorVisual: {fileID: 0}
+  lineRenderer: {fileID: 0}
+  puntos: 30
+  tiempoEntrePuntos: 0.1
+  sensibilidadX: 2
+  sensibilidadY: 2
+  limiteYMin: -60
+  limiteYMax: 60

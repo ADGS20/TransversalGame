@@ -4,47 +4,53 @@ using System.Collections.Generic;
 
 public class HabilidadShaderController : MonoBehaviour
 {
-    [Header("Configuración de Curación")]
+    [Header("Configuración de Curación (Tecla V)")]
     public List<SpriteRenderer> objetosCuracion = new List<SpriteRenderer>();
     public Material materialCuracion;
     public float duracionCuracion = 2f;
 
-    [Header("Configuración de Corrupción")]
+    [Header("Configuración de Corrupción (Tecla C)")]
     public List<SpriteRenderer> objetosCorrupcion = new List<SpriteRenderer>();
     public Material materialCorrupcion;
     public float duracionCorrupcion = 2f;
 
-    [Header("UI")]
-    public GameObject canvasHabilidades;
-    public GameObject botonCuracion;
-    public GameObject botonCorrupcion;
-
-    [Header("Tipo de Zona")]
+    [Header("Tipo de Zona Permitida")]
     public TipoZona tipoZona;
 
     public enum TipoZona
     {
-        Curacion,
-        Corrupcion
+        Curacion,   // Solo permitirá la tecla V
+        Corrupcion, // Solo permitirá la tecla C
+        Ambas       // Permitirá elegir entre V o C
     }
+
+    private bool jugadorEnZona = false;
+    private bool habilidadUsada = false; // Evita que el jugador use la habilidad más de una vez
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && canvasHabilidades != null && canvasHabilidades.activeSelf)
+        // Solo verificamos si el jugador está dentro de la zona y no ha usado la habilidad
+        if (jugadorEnZona && !habilidadUsada)
         {
-            canvasHabilidades.SetActive(false);
-        }
-
-        // Usar el estado global de influencia en lugar de buscar InfluenceUIController
-        if (InfluenceState.Instance != null)
-        {
-            var estado = InfluenceState.Instance.CurrentEstado;
-
-            // Ejemplo de uso: si quieres mostrar/ocultar botones según estado global
-            // (aquí solo se deja como referencia; no cambia la lógica de zona)
-            if (estado == InfluenceState.EstadoInfluencia.Corrupto)
+            // --- VIDA / NATURALEZA (V) ---
+            if (Input.GetKeyDown(KeyCode.V))
             {
-                // lógica específica si hace falta
+                if (tipoZona == TipoZona.Curacion || tipoZona == TipoZona.Ambas)
+                {
+                    UsarHabilidadCuracion();
+                    ModificarInfluencia(15f); // Suma la mitad del valor original
+                    habilidadUsada = true;
+                }
+            }
+            // --- CORRUPCIÓN (C) ---
+            else if (Input.GetKeyDown(KeyCode.C))
+            {
+                if (tipoZona == TipoZona.Corrupcion || tipoZona == TipoZona.Ambas)
+                {
+                    UsarHabilidadCorrupcion();
+                    ModificarInfluencia(-15f); // Resta la mitad del valor original
+                    habilidadUsada = true;
+                }
             }
         }
     }
@@ -62,9 +68,6 @@ public class HabilidadShaderController : MonoBehaviour
                 }
             }
         }
-
-        if (canvasHabilidades != null)
-            canvasHabilidades.SetActive(false);
     }
 
     public void UsarHabilidadCorrupcion()
@@ -80,9 +83,21 @@ public class HabilidadShaderController : MonoBehaviour
                 }
             }
         }
+    }
 
-        if (canvasHabilidades != null)
-            canvasHabilidades.SetActive(false);
+    // Función nueva para afectar el Slider / Estado global de influencia
+    private void ModificarInfluencia(float cantidad)
+    {
+        var state = InfluenceState.EnsureInstance();
+        if (state != null)
+        {
+            state.ModifyValue(cantidad);
+            Debug.Log($"[HabilidadShader] Influencia modificada en: {cantidad}");
+        }
+        else
+        {
+            Debug.LogWarning("[HabilidadShader] InfluenceState no encontrado.");
+        }
     }
 
     IEnumerator AnimarShader(Material mat, float inicio, float fin, float duracion)
@@ -104,21 +119,7 @@ public class HabilidadShaderController : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (canvasHabilidades != null)
-            {
-                canvasHabilidades.SetActive(true);
-
-                if (tipoZona == TipoZona.Curacion)
-                {
-                    if (botonCuracion != null) botonCuracion.SetActive(true);
-                    if (botonCorrupcion != null) botonCorrupcion.SetActive(false);
-                }
-                else if (tipoZona == TipoZona.Corrupcion)
-                {
-                    if (botonCuracion != null) botonCuracion.SetActive(false);
-                    if (botonCorrupcion != null) botonCorrupcion.SetActive(true);
-                }
-            }
+            jugadorEnZona = true;
         }
     }
 
@@ -126,10 +127,7 @@ public class HabilidadShaderController : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (canvasHabilidades != null)
-            {
-                canvasHabilidades.SetActive(false);
-            }
+            jugadorEnZona = false;
         }
     }
 }

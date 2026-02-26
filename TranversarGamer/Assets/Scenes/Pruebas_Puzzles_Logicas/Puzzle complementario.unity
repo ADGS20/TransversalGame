@@ -493,6 +493,34 @@ PrefabInstance:
       propertyPath: scriptJugadorPrincipal
       value: 
       objectReference: {fileID: 153552331}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 1498860309}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: fpsCamera
+      value: 
+      objectReference: {fileID: 932883981}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: stonePrefab
+      value: 
+      objectReference: {fileID: 718345267}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: lineRenderer
+      value: 
+      objectReference: {fileID: 664440495}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: camaraOrbital
+      value: 
+      objectReference: {fileID: 99870392}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: jugadorVisual
+      value: 
+      objectReference: {fileID: 664440494}
+    - target: {fileID: 1829829963504032152, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
+      propertyPath: playerMovement
+      value: 
+      objectReference: {fileID: 153552331}
     - target: {fileID: 3181428360533566895, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
       propertyPath: indicadorVisual
       value: 
@@ -504,42 +532,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 699868402}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
---- !u!1 &699868401 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7037566278894033860, guid: a08577c3ed365d14d8210bab9cd4da7d, type: 3}
-  m_PrefabInstance: {fileID: 699868400}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &699868402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 699868401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd624105b0601cb43bdc9de288e47c03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AimModeController
-  camaraOrbital: {fileID: 99870392}
-  fpsCamera: {fileID: 932883981}
-  playerMovement: {fileID: 153552331}
-  firePoint: {fileID: 1498860309}
-  stonePrefab: {fileID: 718345267}
-  fuerzaDisparo: 15
-  jugadorVisual: {fileID: 664440494}
-  lineRenderer: {fileID: 664440495}
-  puntos: 30
-  tiempoEntrePuntos: 0.1
-  sensibilidadX: 2
-  sensibilidadY: 2
-  limiteYMin: -60
-  limiteYMax: 60
 --- !u!1001 &718345266
 PrefabInstance:
   m_ObjectHideFlags: 0

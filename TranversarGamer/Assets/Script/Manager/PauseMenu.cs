@@ -4,7 +4,9 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseUI;
-    public string mainMenuSceneName = "MainMenu";
+
+    // Cambiamos el string por un int (entero) para usar el número de la escena
+    public int mainMenuSceneIndex = 0;
 
     private bool isPaused = false;
 
@@ -21,7 +23,7 @@ public class PauseMenu : MonoBehaviour
             }
 
             // Segundo: Si el inventario no estaba abierto, hacemos la lógica normal de la Pausa
-            if (isPaused) // (pon aquí tu variable booleana de pausa)
+            if (isPaused)
             {
                 Resume(); // Llama a tu función de quitar la pausa
             }
@@ -46,10 +48,18 @@ public class PauseMenu : MonoBehaviour
         isPaused = false;
     }
 
+    // --- MÉTODO 1: Usa la variable del Inspector ---
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
+        SceneManager.LoadScene(mainMenuSceneIndex); // Carga la escena por su número
+    }
+
+    // --- MÉTODO 2: Permite poner el número directamente en el Botón UI ---
+    public void LoadSceneByNumber(int sceneIndex)
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(sceneIndex);
     }
 
     public void QuitGame()
