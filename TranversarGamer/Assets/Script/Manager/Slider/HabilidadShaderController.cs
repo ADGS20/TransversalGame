@@ -4,130 +4,115 @@ using System.Collections.Generic;
 
 public class HabilidadShaderController : MonoBehaviour
 {
-    [Header("Configuración de Curación (Tecla V)")]
-    public List<SpriteRenderer> objetosCuracion = new List<SpriteRenderer>();
+    [Header("Configuración de Naturaleza (Tecla V)")]
+    // Usamos Renderer para que funcione con MeshRenderer (3D) y SpriteRenderer (2D)
+    public List<Renderer> objetosCuracion = new List<Renderer>();
     public Material materialCuracion;
     public float duracionCuracion = 2f;
 
     [Header("Configuración de Corrupción (Tecla C)")]
-    public List<SpriteRenderer> objetosCorrupcion = new List<SpriteRenderer>();
+    public List<Renderer> objetosCorrupcion = new List<Renderer>();
     public Material materialCorrupcion;
     public float duracionCorrupcion = 2f;
+
+    [Header("Caminos / Obstáculos (Físicos)")]
+    [Tooltip("Aquí debes arrastrar los objetos que quieres que aparezcan o desaparezcan")]
+    public List<GameObject> caminosAModificar = new List<GameObject>();
 
     [Header("Tipo de Zona Permitida")]
     public TipoZona tipoZona;
 
-    public enum TipoZona
-    {
-        Curacion,   // Solo permitirá la tecla V
-        Corrupcion, // Solo permitirá la tecla C
-        Ambas       // Permitirá elegir entre V o C
-    }
+    public enum TipoZona { Curacion, Corrupcion, Ambas }
 
     private bool jugadorEnZona = false;
-    private bool habilidadUsada = false; // Evita que el jugador use la habilidad más de una vez
+    private bool habilidadUsada = false;
 
     void Update()
     {
-        // Solo verificamos si el jugador está dentro de la zona y no ha usado la habilidad
         if (jugadorEnZona && !habilidadUsada)
         {
-            // --- VIDA / NATURALEZA (V) ---
+            // --- NATURALEZA (V): Primero habilita el objeto, luego hace el efecto ---
             if (Input.GetKeyDown(KeyCode.V))
             {
                 if (tipoZona == TipoZona.Curacion || tipoZona == TipoZona.Ambas)
                 {
-                    UsarHabilidadCuracion();
-                    ModificarInfluencia(15f); // Suma la mitad del valor original
+                    StartCoroutine(SecuenciaNaturaleza());
                     habilidadUsada = true;
                 }
             }
-            // --- CORRUPCIÓN (C) ---
+            // --- CORRUPCIÓN (C): Primero hace el efecto, luego deshabilita el objeto ---
             else if (Input.GetKeyDown(KeyCode.C))
             {
                 if (tipoZona == TipoZona.Corrupcion || tipoZona == TipoZona.Ambas)
                 {
-                    UsarHabilidadCorrupcion();
-                    ModificarInfluencia(-15f); // Resta la mitad del valor original
+                    StartCoroutine(SecuenciaCorrupcion());
                     habilidadUsada = true;
                 }
             }
         }
     }
 
-    public void UsarHabilidadCuracion()
+    IEnumerator SecuenciaNaturaleza()
     {
-        if (objetosCuracion.Count > 0 && materialCuracion != null)
+        // 1. Activa el "cuadrito" (GameObject) primero
+        SetEstadoCaminos(true);
+        ModificarInfluencia(15f);
+
+        // 2. Hace el efecto visual (Aparecer: de 1 a 0)
+        yield return StartCoroutine(AnimarEfecto(objetosCuracion, materialCuracion, 1f, 0f, duracionCuracion));
+    }
+
+    IEnumerator SecuenciaCorrupcion()
+    {
+        ModificarInfluencia(-15f);
+
+        // 1. Hace el efecto visual primero (Desaparecer: de 0 a 1)
+        yield return StartCoroutine(AnimarEfecto(objetosCorrupcion, materialCorrupcion, 0f, 1f, duracionCorrupcion));
+
+        // 2. Desactiva el "cuadrito" (GameObject) al final
+        SetEstadoCaminos(false);
+    }
+
+    private void SetEstadoCaminos(bool estado)
+    {
+        foreach (GameObject camino in caminosAModificar)
         {
-            foreach (SpriteRenderer obj in objetosCuracion)
+            if (camino != null)
             {
-                if (obj != null)
-                {
-                    obj.material = materialCuracion;
-                    StartCoroutine(AnimarShader(obj.material, 1f, 0f, duracionCuracion));
-                }
+                camino.SetActive(estado);
+                Debug.Log($"[Habilidad] Objeto {camino.name} ahora está {(estado ? "ACTIVO" : "INACTIVO")}");
             }
         }
     }
 
-    public void UsarHabilidadCorrupcion()
+    IEnumerator AnimarEfecto(List<Renderer> lista, Material matHabilidad, float inicio, float fin, float duracion)
     {
-        if (objetosCorrupcion.Count > 0 && materialCorrupcion != null)
-        {
-            foreach (SpriteRenderer obj in objetosCorrupcion)
-            {
-                if (obj != null)
-                {
-                    obj.material = materialCorrupcion;
-                    StartCoroutine(AnimarShader(obj.material, 0f, 1f, duracionCorrupcion));
-                }
-            }
-        }
-    }
+        if (lista.Count == 0 || matHabilidad == null) yield break;
 
-    // Función nueva para afectar el Slider / Estado global de influencia
-    private void ModificarInfluencia(float cantidad)
-    {
-        var state = InfluenceState.EnsureInstance();
-        if (state != null)
+        foreach (Renderer rend in lista)
         {
-            state.ModifyValue(cantidad);
-            Debug.Log($"[HabilidadShader] Influencia modificada en: {cantidad}");
+            if (rend != null) rend.material = matHabilidad;
         }
-        else
-        {
-            Debug.LogWarning("[HabilidadShader] InfluenceState no encontrado.");
-        }
-    }
 
-    IEnumerator AnimarShader(Material mat, float inicio, float fin, float duracion)
-    {
         float tiempo = 0f;
-
         while (tiempo < duracion)
         {
             tiempo += Time.deltaTime;
             float progreso = Mathf.Lerp(inicio, fin, tiempo / duracion);
-            mat.SetFloat("_DissolveAmount", progreso);
+            foreach (Renderer rend in lista)
+            {
+                if (rend != null) rend.material.SetFloat("_DissolveAmount", progreso);
+            }
             yield return null;
         }
-
-        mat.SetFloat("_DissolveAmount", fin);
     }
 
-    void OnTriggerEnter(Collider other)
+    private void ModificarInfluencia(float cantidad)
     {
-        if (other.CompareTag("Player"))
-        {
-            jugadorEnZona = true;
-        }
+        var state = InfluenceState.EnsureInstance();
+        if (state != null) state.ModifyValue(cantidad);
     }
 
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            jugadorEnZona = false;
-        }
-    }
+    void OnTriggerEnter(Collider other) { if (other.CompareTag("Player")) jugadorEnZona = true; }
+    void OnTriggerExit(Collider other) { if (other.CompareTag("Player")) jugadorEnZona = false; }
 }

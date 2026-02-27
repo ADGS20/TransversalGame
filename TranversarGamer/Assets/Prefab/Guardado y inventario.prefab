@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5268954320220614796
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6821069482980379484}
+  - component: {fileID: 1176422613267020468}
+  - component: {fileID: 6182757518533982138}
+  m_Layer: 0
+  m_Name: Guardado y inventario
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6821069482980379484
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5268954320220614796}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.05406, y: 0.21076, z: 0.11682}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1176422613267020468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5268954320220614796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca01e38622eac5e4a8e27b2c3d2a92c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  objetosRecogidos:
+  - {fileID: 11400000, guid: a93abbcecf36fd84d9899a835c02f6cc, type: 2}
+  - {fileID: 11400000, guid: ebf0d8158b2b2ba42a3332e333994694, type: 2}
+  objetosDestruidosMundo: []
+  panelInventario: {fileID: 0}
+  prefabIconoItem: {fileID: 4144488473199108894, guid: 7f2685ae10535dd4882d923951fa0983, type: 3}
+  contenedorDeIconos: {fileID: 0}
+--- !u!114 &6182757518533982138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5268954320220614796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c09101cb61ac6dd43b8e6b9b806ed2dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveSystem
+  jugador: {fileID: 0}
+  camaraOrbital: {fileID: 0}
+  cartelGuardado: {fileID: 0}
+  decisionesActuales: 

@@ -27,12 +27,14 @@ public class CameraRaycast : MonoBehaviour
 
                 if (obstaculo != null && !obstaculosDetectadosEsteFrame.Contains(obstaculo))
                 {
+                    // LE DECIMOS AL ÁRBOL QUIÉN ESTÁ DETRÁS PARA SEGUIRLO
+                    obstaculo.personajeOculto = obj;
                     obstaculosDetectadosEsteFrame.Add(obstaculo);
                 }
             }
         }
 
-        // Ocultar los nuevos detectados
+        // Ocultar
         foreach (TransparentObstacle obstaculo in obstaculosDetectadosEsteFrame)
         {
             if (!obstaculosActualmenteOcultos.Contains(obstaculo))
@@ -42,7 +44,7 @@ public class CameraRaycast : MonoBehaviour
             }
         }
 
-        // Mostrar los que ya no están tapando
+        // Mostrar
         List<TransparentObstacle> obstaculosParaMostrar = new List<TransparentObstacle>();
         foreach (TransparentObstacle obstaculo in obstaculosActualmenteOcultos)
         {

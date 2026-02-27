@@ -5,24 +5,27 @@ public class TransparentObstacle : MonoBehaviour
 {
     private Renderer myRenderer;
     private Coroutine currentCoroutine;
-
-    [Header("Configuración del Fade Suave")]
-    [Range(0f, 1f)] public float transparencyTarget = 0.2f; // Hasta qué punto se vuelve invisible (0 = nada, 1 = opaco)
-    public float fadeSpeed = 5.0f; // Qué tan rápido ocurre el desvanecimiento
-
-    private float fadeProgress = 1.0f;
     private Material[] materiales;
+
+    [Header("Configuración del Recorte")]
+    public float tamanoMaximo = 0.2f;
+    public float velocidadFade = 2.0f;
+
+    [Header("Configuración del Contorno")]
+    public bool esconderContornoAlRecortar = true;
     private float[] grosoresOriginales;
+
+    [HideInInspector]
+    public Transform personajeOculto;
+    private float tamanoActual = 0f;
 
     private void Start()
     {
         myRenderer = GetComponent<Renderer>();
-
-        // Guardamos todos los materiales (el árbol y el contorno)
         materiales = myRenderer.materials;
         grosoresOriginales = new float[materiales.Length];
 
-        // Guardamos el tamaño original del contorno por si acaso
+        // Guardamos los grosores iniciales para poder restaurarlos
         for (int i = 0; i < materiales.Length; i++)
         {
             if (materiales[i].HasProperty("_Grosor"))
@@ -32,59 +35,54 @@ public class TransparentObstacle : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (personajeOculto != null && tamanoActual > 0.01f)
+        {
+            Vector3 viewportPos = Camera.main.WorldToViewportPoint(personajeOculto.position);
+            viewportPos.y += 0.05f;
+
+            foreach (Material mat in materiales)
+            {
+                if (mat.HasProperty("_PosicionPantalla"))
+                    mat.SetVector("_PosicionPantalla", (Vector2)viewportPos);
+            }
+        }
+    }
+
     public void StartFadeOut()
     {
         if (currentCoroutine != null) StopCoroutine(currentCoroutine);
-        currentCoroutine = StartCoroutine(DoFade(transparencyTarget));
+        currentCoroutine = StartCoroutine(AnimarEfecto(tamanoMaximo));
     }
 
     public void StartFadeIn()
     {
         if (currentCoroutine != null) StopCoroutine(currentCoroutine);
-        currentCoroutine = StartCoroutine(DoFade(2.0f));
+        currentCoroutine = StartCoroutine(AnimarEfecto(0f));
     }
 
-    private IEnumerator DoFade(float targetAlpha)
+    private IEnumerator AnimarEfecto(float targetTamano)
     {
-        float startAlpha = fadeProgress;
-        float elapsed = 0f;
-
-        while (elapsed < 1.0f)
+        while (!Mathf.Approximately(tamanoActual, targetTamano))
         {
-            elapsed += Time.deltaTime * fadeSpeed;
-            // Interpolación matemática para que el cambio sea súper suave
-            fadeProgress = Mathf.Lerp(startAlpha, targetAlpha, elapsed);
+            tamanoActual = Mathf.MoveTowards(tamanoActual, targetTamano, Time.deltaTime * velocidadFade);
 
-            AplicarFadeATodos(fadeProgress);
-
-            yield return null; // Esperamos al siguiente frame
-        }
-
-        // Aseguramos que termine en el valor exacto
-        fadeProgress = targetAlpha;
-        AplicarFadeATodos(fadeProgress);
-    }
-
-    private void AplicarFadeATodos(float alphaGlobal)
-    {
-        // Revisamos TODOS los materiales uno por uno (Árbol y Contorno)
-        for (int i = 0; i < materiales.Length; i++)
-        {
-            Material mat = materiales[i];
-
-            // 1. Si el material tiene "Opacidad" (ahora ambos la tienen), se desvanece suavemente
-            if (mat.HasProperty("_Opacidad"))
+            for (int i = 0; i < materiales.Length; i++)
             {
-                mat.SetFloat("_Opacidad", alphaGlobal);
-            }
+                // 1. Actualizamos el recorte (Stencil/X-Ray)
+                if (materiales[i].HasProperty("_TamanoCuadro"))
+                    materiales[i].SetFloat("_TamanoCuadro", tamanoActual);
 
-            // 2. Si el material tiene "Grosor", lo encogemos un poco para que el borde no se vea feo al ser transparente
-            if (mat.HasProperty("_Grosor"))
-            {
-                float porcentaje = (alphaGlobal - transparencyTarget) / (1.0f - transparencyTarget);
-                porcentaje = Mathf.Clamp01(porcentaje);
-                mat.SetFloat("_Grosor", grosoresOriginales[i] * porcentaje);
+                // 2. Solo si está activado, ocultamos el contorno proporcionalmente
+                if (esconderContornoAlRecortar && materiales[i].HasProperty("_Grosor"))
+                {
+                    // Si el hueco crece, el grosor baja a 0
+                    float factor = 1.0f - (tamanoActual / tamanoMaximo);
+                    materiales[i].SetFloat("_Grosor", grosoresOriginales[i] * factor);
+                }
             }
+            yield return null;
         }
     }
 }
