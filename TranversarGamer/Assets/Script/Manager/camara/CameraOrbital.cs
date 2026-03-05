@@ -309,4 +309,6 @@ public class CameraOrbital : MonoBehaviour
         zoomFactorActual = zoomGuardado;
     }
 
+   
+
 }

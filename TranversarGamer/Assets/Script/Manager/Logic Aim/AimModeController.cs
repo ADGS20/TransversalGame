@@ -11,10 +11,11 @@ public class AimModeController : MonoBehaviour
     public Camera fpsCamera;              // Cámara usada en modo apuntado
 
     [Header("Jugador y disparo")]
-    public Mov_Player3D playerMovement;   // Controlador del jugador
-    public Transform firePoint;           // Punto desde donde se dispara la piedra
-    public GameObject stonePrefab;        // Prefab del proyectil
-    public float fuerzaDisparo = 15f;     // Fuerza aplicada al proyectil
+    public Mov_Player3D playerMovement;
+    public Transform firePoint;
+    public CompainController mascotaARolzar; // <--- NUEVO: Referencia directa a la mascota
+    // public GameObject stonePrefab;        // <--- Bórralo o coméntalo
+    public float fuerzaDisparo = 15f;
 
     [Header("Jugador visual")]
     public GameObject jugadorVisual;      // Modelo o sprite del jugador visible en tercera persona
@@ -157,33 +158,24 @@ public class AimModeController : MonoBehaviour
 
     void Disparar()
     {
-        // Validar prefab
-        if (stonePrefab == null)
+        if (mascotaARolzar == null)
         {
-            Debug.LogError("stonePrefab no está asignado.");
+            Debug.LogError("No has asignado la mascota en el AimModeController.");
             return;
         }
 
-        // Instanciar proyectil
-        GameObject piedra = Instantiate(stonePrefab, firePoint.position, firePoint.rotation);
+        Vector3 fuerza = firePoint.forward * fuerzaDisparo;
 
-        if (piedra == null)
+        // --- MODIFICADO: Ahora le pasamos la cámara orbital y el transform del jugador ---
+        mascotaARolzar.SerLanzado(firePoint.position, fuerza, camaraOrbital, playerMovement.transform);
+
+        DesactivarModoApuntar();
+
+        // Hacer que la cámara siga a la mascota durante el vuelo
+        if (camaraOrbital != null)
         {
-            Debug.LogError("Error al instanciar la piedra.");
-            return;
+            camaraOrbital.CambiarObjetivo(mascotaARolzar.transform);
         }
-
-        // Obtener Rigidbody
-        Rigidbody rb = piedra.GetComponent<Rigidbody>();
-
-        if (rb == null)
-        {
-            Debug.LogError("El prefab de la piedra no tiene Rigidbody.");
-            return;
-        }
-
-        // Aplicar fuerza de disparo
-        rb.AddForce(firePoint.forward * fuerzaDisparo, ForceMode.Impulse);
     }
 
     void MostrarTrayectoria()

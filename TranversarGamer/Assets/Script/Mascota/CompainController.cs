@@ -40,6 +40,9 @@ public class CompainController : MonoBehaviour
     [Tooltip("¿Está siendo controlado por el jugador?")]
     public bool esControlable = false;
 
+    [Tooltip("¿Está siendo lanzada por el jugador?")]
+    public bool estaLanzado = false;
+
     [Tooltip("¿Debe seguir automáticamente al jugador cuando no es controlable?")]
     public bool seguimientoActivo = true;
 
@@ -55,6 +58,10 @@ public class CompainController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Camera camaraJuego;
     private Collider colliderCompanero;
+
+    // Variables para recordar la cámara y devolvérsela al jugador
+    private CameraOrbital camaraOrbitalTemporal;
+    private Transform objetivoOriginalCamara;
 
     private bool enSuelo;
     private bool estaPlanando = false;
@@ -170,6 +177,23 @@ public class CompainController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // --- NUEVA LÓGICA DE LANZAMIENTO ---
+        if (estaLanzado)
+        {
+            // Mientras está en el aire por ser lanzada, ignoramos tu gravedad personalizada 
+            // y dejamos que el Rigidbody y Unity hagan el arco perfecto.
+
+            // Si empieza a caer (velocidad Y menor que un pequeño margen) y toca el suelo:
+            if (rb.linearVelocity.y <= 0.1f && enSuelo)
+            {
+                AterrizarDespuesDeLanzamiento();
+            }
+
+            // Salimos del FixedUpdate para que NO ejecute el rb.MovePosition
+            return;
+        }
+        // -----------------------------------
+
         // Gravedad personalizada
         if (!enSuelo)
         {
@@ -288,6 +312,10 @@ public class CompainController : MonoBehaviour
         esControlable = true;
         seguimientoActivo = false; // cuando tomas el control, dejas de seguir
 
+        // Añade estas dos líneas:
+        estaLanzado = false;
+        if (rb != null) rb.useGravity = false;
+
         if (colliderCompanero != null)
             colliderCompanero.isTrigger = false;
 
@@ -349,4 +377,51 @@ public class CompainController : MonoBehaviour
                 direccionMovimiento.Normalize();
         }
     }
+
+    /// <summary>
+    /// Llamado desde el AimModeController para lanzar a la mascota.
+    /// </summary>
+    // Le añadimos dos parámetros nuevos a la función
+    public void SerLanzado(Vector3 posicionInicial, Vector3 fuerza, CameraOrbital camara, Transform jugador)
+    {
+        seguimientoActivo = false;
+        estaLanzado = true;
+
+        // Guardamos la cámara y al jugador para cuando aterrice
+        camaraOrbitalTemporal = camara;
+        objetivoOriginalCamara = jugador;
+
+        if (colliderCompanero == null) colliderCompanero = GetComponent<Collider>();
+        if (colliderCompanero != null) colliderCompanero.isTrigger = false;
+
+        transform.position = posicionInicial;
+        rb.useGravity = true;
+        rb.linearVelocity = Vector3.zero;
+        rb.AddForce(fuerza, ForceMode.Impulse);
+    }
+
+    /// <summary>
+    /// Llamado cuando la mascota toca el piso después de ser lanzada.
+    /// </summary>
+    private void AterrizarDespuesDeLanzamiento()
+    {
+        estaLanzado = false;
+
+        rb.useGravity = false;
+        rb.linearVelocity = Vector3.zero;
+        velocidadVertical = 0f;
+        direccionMovimiento = Vector3.zero;
+
+        // --- NUEVO: Regresar la cámara al jugador al tocar el suelo ---
+        if (camaraOrbitalTemporal != null && objetivoOriginalCamara != null)
+        {
+            camaraOrbitalTemporal.CambiarObjetivo(objetivoOriginalCamara);
+
+            // Limpiamos las variables por seguridad
+            camaraOrbitalTemporal = null;
+            objetivoOriginalCamara = null;
+        }
+        // --------------------------------------------------------------
+    }
+
 }

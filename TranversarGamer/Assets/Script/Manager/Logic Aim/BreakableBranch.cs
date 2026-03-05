@@ -34,8 +34,23 @@ public class BreakableBranch : MonoBehaviour
         // Evitar múltiples activaciones
         if (rota) return;
 
-        // Si la rama es golpeada por un proyectil, se rompe
+        bool debeRomperse = false;
+
+        // 1. Si es un proyectil normal de piedra (por si acaso)
         if (collision.gameObject.CompareTag("Projectile"))
+        {
+            debeRomperse = true;
+        }
+
+        // 2. Si es la mascota (sin importar su tag "craitura") y está siendo lanzada
+        CompainController mascota = collision.gameObject.GetComponent<CompainController>();
+        if (mascota != null && mascota.estaLanzado)
+        {
+            debeRomperse = true;
+        }
+
+        // Si se cumple cualquiera de las dos, rompemos la rama
+        if (debeRomperse)
         {
             RomperRama();
         }
