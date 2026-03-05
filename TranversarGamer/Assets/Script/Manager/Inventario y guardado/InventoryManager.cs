@@ -77,6 +77,31 @@ public class InventoryManager : MonoBehaviour
 
     public void EliminarItem(ItemData item)
     {
-        if (objetosRecogidos.Contains(item)) objetosRecogidos.Remove(item);
+        // Si tenemos el objeto en la lista, lo quitamos
+        if (objetosRecogidos.Contains(item))
+        {
+            objetosRecogidos.Remove(item);
+            ActualizarInterfaz(); // Llamamos a una función para refrescar los iconos
+        }
+    }
+
+    // Esta función borra todos los iconos viejos y los vuelve a crear basados en lo que realmente tienes
+    public void ActualizarInterfaz()
+    {
+        if (contenedorDeIconos == null || prefabIconoItem == null) return;
+
+        // 1. Destruimos todos los iconos visuales actuales
+        foreach (Transform hijo in contenedorDeIconos)
+        {
+            Destroy(hijo.gameObject);
+        }
+
+        // 2. Volvemos a crear los iconos solo de los objetos que quedan en la lista
+        foreach (ItemData itemRestante in objetosRecogidos)
+        {
+            GameObject nuevoIcono = Instantiate(prefabIconoItem, contenedorDeIconos);
+            Image imagenUI = nuevoIcono.GetComponent<Image>();
+            if (imagenUI != null && itemRestante.icono != null) imagenUI.sprite = itemRestante.icono;
+        }
     }
 }
