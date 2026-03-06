@@ -2893,7 +2893,7 @@ GameObject:
   - component: {fileID: 216622983}
   - component: {fileID: 216622986}
   - component: {fileID: 216622985}
-  - component: {fileID: 216622984}
+  - component: {fileID: 216622987}
   m_Layer: 0
   m_Name: arbolAlmacenBase
   m_TagString: Untagged
@@ -2916,29 +2916,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 936379801}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &216622984
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 216622982}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!23 &216622985
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2995,6 +2972,28 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 216622982}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!64 &216622987
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 216622982}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &224949625
 PrefabInstance:
@@ -4148,31 +4147,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.03063511
+      value: 0.007383294
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.00000013694878
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.04177594
+      value: 0.05830408
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.3342514
+      value: -0.0101739885
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.33425146
+      value: 0.010173899
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.62311804
+      value: -0.7070337
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.6231179
+      value: -0.7070335
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4180,7 +4179,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -123.58
+      value: -181.649
       objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: 3ceb3bceeb921a14489aeff91e7aec11, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -12388,7 +12387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 829d52ce5d3000a4a8ae18a4d23fab4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EndTestScript
-  Scene: StartScreen
+  Scene: MenuPrincipal
 --- !u!65 &1035961988
 BoxCollider:
   m_ObjectHideFlags: 0
