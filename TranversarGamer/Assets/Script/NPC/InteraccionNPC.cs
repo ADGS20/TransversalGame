@@ -21,8 +21,10 @@ public class InteraccionNPC : MonoBehaviour
 
     void Update()
     {
-        // Ahora Unity comprueba la tecla que hayas elegido en el Inspector
-        if (jugadorCerca && Input.GetKeyDown(teclaInteraccion))
+        // Solo permite interactuar si el jugador está cerca Y NO hay un diálogo activo
+        bool puedeInteractuar = jugadorCerca && (DialogueManager.Instance == null || !DialogueManager.Instance.estaHablando);
+
+        if (puedeInteractuar && Input.GetKeyDown(teclaInteraccion))
         {
             IntentarInteraccion();
         }

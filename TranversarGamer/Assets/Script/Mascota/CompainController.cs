@@ -118,6 +118,27 @@ public class CompainController : MonoBehaviour
         // Comprobar suelo
         enSuelo = Physics.CheckSphere(checkSuelo.position, radioCheckSuelo, capaSuelo);
 
+        // --- NUEVA LÓGICA DE DETECCIÓN DE SUELO (Sin capas ni tags) ---
+        enSuelo = false;
+        // Buscamos todos los colliders en el radio del checkSuelo
+        Collider[] colisiones = Physics.OverlapSphere(checkSuelo.position, radioCheckSuelo);
+
+        foreach (var col in colisiones)
+        {
+            // 1. Ignoramos si es el propio collider de la mascota
+            if (col.transform == transform) continue;
+
+            // 2. Ignoramos si es el jugador principal
+            if (jugadorPrincipal != null && col.transform == jugadorPrincipal) continue;
+
+            // 3. Ignoramos si es un Trigger (como zonas de diálogo o checkpoints)
+            if (col.isTrigger) continue;
+
+            // Si pasó los filtros, significa que hemos tocado algo sólido (el suelo)
+            enSuelo = true;
+            break; // Ya encontramos suelo, no hace falta seguir mirando el resto
+        }
+
         if (esControlable)
         {
             CapturarInputManual();

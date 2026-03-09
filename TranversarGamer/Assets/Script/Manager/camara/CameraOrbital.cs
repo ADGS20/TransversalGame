@@ -51,6 +51,11 @@ public class CameraOrbital : MonoBehaviour
     [SerializeField] private float velocidadZoomMando = 1.0f;
     [SerializeField] private float deadzoneStick = 0.2f;   // Zona muerta para el stick
 
+    [Header("Valor de rotacion")]
+    [SerializeField] public int RotacionCamara = 45;
+
+    private GameplayManager gm; // Variable para cachear el manager
+
     private Transform objetivo;            // Transform del objetivo a seguir
 
     // Estado rotación
@@ -77,6 +82,9 @@ public class CameraOrbital : MonoBehaviour
         tieneStickDerechoVertical = ComprobarEje(ejeStickDerechoVertical);
         if (!tieneStickDerechoVertical)
             Debug.LogWarning($"CameraOrbital: Eje '{ejeStickDerechoVertical}' no configurado. Zoom con mando deshabilitado.");
+
+        // Buscamos el GameplayManager al arrancar
+        gm = FindObjectOfType<GameplayManager>();
     }
 
     void Update()
@@ -116,29 +124,33 @@ public class CameraOrbital : MonoBehaviour
     /// </summary>
     private void DetectarRotacionTecladoYMando()
     {
+        // 1. Si ya está rotando, no hacemos nada
         if (estaRotando) return;
+
+        // 2. NUEVA COMPROBACIÓN: Si los controles están bloqueados (por el diálogo), salimos
+        if (gm != null && gm.controlesGlobalBloqueados) return;
 
         // Teclado: E (derecha), Q (izquierda)
         if (Input.GetKeyDown(teclaRotarDerecha))
         {
-            SetRotacionObjetivo(anguloObjetivo + 90f);
+            SetRotacionObjetivo(anguloObjetivo + RotacionCamara);
             return;
         }
         if (Input.GetKeyDown(teclaRotarIzquierda))
         {
-            SetRotacionObjetivo(anguloObjetivo - 90f);
+            SetRotacionObjetivo(anguloObjetivo - RotacionCamara);
             return;
         }
 
         // Mando: RB (derecha), LB (izquierda)
         if (Input.GetKeyDown(botonRotarDerechaMando))
         {
-            SetRotacionObjetivo(anguloObjetivo + 90f);
+            SetRotacionObjetivo(anguloObjetivo + RotacionCamara);
             return;
         }
         if (Input.GetKeyDown(botonRotarIzquierdaMando))
         {
-            SetRotacionObjetivo(anguloObjetivo - 90f);
+            SetRotacionObjetivo(anguloObjetivo - RotacionCamara);
             return;
         }
     }
