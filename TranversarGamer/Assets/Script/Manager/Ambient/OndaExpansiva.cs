@@ -6,30 +6,26 @@ public class OndaExpansiva : MonoBehaviour
     public float radioMaximo = 15f;
     public float velocidadExpansion = 10f;
 
-    [Header("Visual (Opcional pero recomendado)")]
-    public Transform esferaVisual; // Un objeto 3D Esfera con un material semitransparente
+    [Header("Visual (Opcional)")]
+    public Transform esferaVisual; // La esfera 3D semitransparente
 
     private float radioActual = 0f;
     private bool estaExpandiendo = false;
 
     void Start()
     {
-        // Asegurarnos de que el radio global empieza en 0 para los shaders
         Shader.SetGlobalFloat("_RadioExpansion", 0f);
-
-        if (esferaVisual != null)
-            esferaVisual.localScale = Vector3.zero;
+        if (esferaVisual != null) esferaVisual.localScale = Vector3.zero;
     }
 
     void Update()
     {
-        // Sincronizamos las teclas V y C con tu otro script para lanzar la onda al mismo tiempo
+        // Escuchamos las mismas teclas que tu HabilidadShaderController
         if (Input.GetKeyDown(KeyCode.V) || Input.GetKeyDown(KeyCode.C))
         {
             EmpezarExpansion();
         }
 
-        // Lógica matemática de la esfera creciendo
         if (estaExpandiendo)
         {
             radioActual += velocidadExpansion * Time.deltaTime;
@@ -37,41 +33,26 @@ public class OndaExpansiva : MonoBehaviour
             if (radioActual >= radioMaximo)
             {
                 radioActual = radioMaximo;
-                estaExpandiendo = false; // Se detiene al llegar al máximo
+                estaExpandiendo = false;
             }
 
-            // 1. Actualizamos el tamaño del objeto visual
             if (esferaVisual != null)
             {
                 esferaVisual.localScale = Vector3.one * (radioActual * 2);
             }
 
-            // 2. LA MAGIA: Enviamos la posición y el radio a TODOS los shaders a la vez
+            // Aquí enviamos la info a TODOS los shaders a la vez
             Shader.SetGlobalVector("_PosicionOnda", transform.position);
             Shader.SetGlobalFloat("_RadioExpansion", radioActual);
-        }
-        else if (radioActual > 0 && Input.GetKeyUp(KeyCode.V) == false)
-        {
-            // Opcional: Si quieres que la onda se contraiga al volver a pulsar, 
-            // puedes añadir lógica aquí para reducir el radio.
         }
     }
 
     public void EmpezarExpansion()
     {
         estaExpandiendo = true;
-        radioActual = 0f; // Reiniciamos el radio para que empiece desde el jugador
+        radioActual = 0f;
 
         if (esferaVisual != null)
-        {
             esferaVisual.gameObject.SetActive(true);
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        // Para ver hasta dónde llega el radio máximo en el editor
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, radioMaximo);
     }
 }
