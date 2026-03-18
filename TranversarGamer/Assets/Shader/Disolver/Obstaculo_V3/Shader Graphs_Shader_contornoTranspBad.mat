@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7153742505586852988
+--- !u!114 &-8676186148840801858
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MM_Outline_BadArbol
-  m_Shader: {fileID: -6465566751694194690, guid: 93470056403c75b48ba623e373767d69, type: 3}
+  m_Name: Shader Graphs_Shader_contornoTranspBad
+  m_Shader: {fileID: -6465566751694194690, guid: ffddaf9a00def1c4fbea715881306ede, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -51,11 +51,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Grosor: 0.00005
+    - _Grosor: 0.0001
+    - _GrosorLaser: 0.3
+    - _OndaEsV: 1
     - _Opacity: 2
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _RadioOnda: 0
+    - _TipoObjeto: 2
     m_Colors:
+    - _CentroOnda: {r: 0, g: 0, b: 0, a: 0}
+    - _ColorLaserOnda: {r: 0, g: 0, b: 0, a: 1}
     - _Colorcontorno: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

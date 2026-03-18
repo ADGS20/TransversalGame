@@ -292,6 +292,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZonaOndaMagica
   radioMaximo: 15
   segundosExpansion: 2
+  grosorLaser: 0.3
+  colorV: {r: 0, g: 1, b: 0, a: 1}
+  colorC: {r: 0.6, g: 0, b: 1, a: 1}
   aparecenConV:
   - {fileID: 1129017018}
   - {fileID: 1504336365}
@@ -462,7 +465,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7c917239ee790461b8b46b53c2ffd0d2, type: 2}
+  - {fileID: 2100000, guid: 554f0b68592522b4980baba366db5cbf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -976,20 +979,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: m_Materials.Array.size
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 575a382a5f29d2d4985ed380f358e9e9, type: 2}
+      objectReference: {fileID: 2100000, guid: abf3f92e90e0ef94fa6675a2f4873eb4, type: 2}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 2d44438fe8c06ea4e87cad871c8ddb8d, type: 2}
+      objectReference: {fileID: 2100000, guid: 472be9780aec54d4e96e5f2c250476a2, type: 2}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[2]'
       value: 
-      objectReference: {fileID: 2100000, guid: a6424108c06d2114fa745a4f0491b06e, type: 2}
+      objectReference: {fileID: 2100000, guid: 2d44438fe8c06ea4e87cad871c8ddb8d, type: 2}
     - target: {fileID: 919132149155446097, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: m_Name
       value: Sk_ArbolBad
@@ -1654,8 +1657,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: df6219926368041ac926da7e3dbc92c7, type: 2}
-  - {fileID: 2100000, guid: 998f3caa9bf62a5419fb7d6d7f262560, type: 2}
+  - {fileID: 2100000, guid: 554f0b68592522b4980baba366db5cbf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1898,12 +1900,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
       propertyPath: m_Materials.Array.size
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
       propertyPath: 'm_Materials.Array.data[2]'
       value: 
       objectReference: {fileID: 2100000, guid: a6424108c06d2114fa745a4f0491b06e, type: 2}
+    - target: {fileID: 1865222944940723081, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: jugador
+      value: 
+      objectReference: {fileID: 1511493763}
     - target: {fileID: 2383728215584549735, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
       propertyPath: m_Name
       value: SM_Arbol_Beta
@@ -2241,6 +2247,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[2]'
       value: 
       objectReference: {fileID: 2100000, guid: 3b6e2aa0e4976fb4e88ed142d184a386, type: 2}
+    - target: {fileID: 1865222944940723081, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: jugador
+      value: 
+      objectReference: {fileID: 1511493763}
     - target: {fileID: 2383728215584549735, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
       propertyPath: m_Name
       value: SM_Arbol_Beta (1)
@@ -2294,6 +2304,11 @@ PrefabInstance:
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2383728215584549735, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
   m_PrefabInstance: {fileID: 1504336364}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1511493763 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2069359921285685152, guid: 184671193e6c1e8448cd175dc1ac4469, type: 3}
+  m_PrefabInstance: {fileID: 1016159941}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1775474475 stripped
 GameObject:
@@ -2362,16 +2377,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: m_Materials.Array.size
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 575a382a5f29d2d4985ed380f358e9e9, type: 2}
+      objectReference: {fileID: 2100000, guid: abf3f92e90e0ef94fa6675a2f4873eb4, type: 2}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 2d44438fe8c06ea4e87cad871c8ddb8d, type: 2}
+      objectReference: {fileID: 2100000, guid: 472be9780aec54d4e96e5f2c250476a2, type: 2}
     - target: {fileID: -7511558181221131132, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
       propertyPath: 'm_Materials.Array.data[2]'
       value: 

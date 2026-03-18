@@ -3,132 +3,167 @@ using System.Collections.Generic;
 
 public class ZonaOndaMagica : MonoBehaviour
 {
-    [Header("Configuración de la Zona")]
-    public float radioMaximo = 15f;
-    public float segundosExpansion = 2f;
+    [Header("Configuración de la Onda")]
+    public float radioMaximo = 50f; // ¡Aumentado a 50 para que cubra todo a la vista!
+    public float segundosExpansion = 2.5f;
+    public float grosorLaser = 0.5f;
 
-    [Header("--- CUANDO PULSAS V (NATURALEZA) ---")]
+    [Header("Colores del Láser")]
+    [ColorUsage(true, true)] public Color colorV = Color.green * 3f; // Multiplicado para que brille más
+    [ColorUsage(true, true)] public Color colorC = new Color(0.6f, 0f, 1f, 1f) * 3f;
+
+    [Header("--- NATURALEZA (Tecla V) ---")]
     public List<GameObject> aparecenConV;
     public List<GameObject> desaparecenConV;
 
-    [Header("--- CUANDO PULSAS C (CORRUPCIÓN) ---")]
+    [Header("--- CORRUPCIÓN (Tecla C) ---")]
     public List<GameObject> aparecenConC;
     public List<GameObject> desaparecenConC;
 
-    private bool jugadorEnZona = false;
-    private bool yaSeUso = false;
-    private Transform jugadorTransform;
-
+    private bool expandiendo = false;
+    private bool esOndaV = false;
     private float radioActual = 0f;
-    private bool expandiendoV = false;
-    private bool expandiendoC = false;
     private Vector3 centroOnda;
 
-    private List<GameObject> pendientesAparecer = new List<GameObject>();
-    private List<GameObject> pendientesDesaparecer = new List<GameObject>();
+    // LA SOLUCIÓN DEFINITIVA: Guardamos todos los materiales en una lista para obligar a Unity a actualizarlos
+    private List<Material> todosLosMateriales = new List<Material>();
 
     void Start()
     {
-        Shader.SetGlobalFloat("_RadioCreacion", 0f);
-        Shader.SetGlobalFloat("_RadioCorrupcion", 0f);
+        todosLosMateriales.Clear();
 
-        // 1. APAGAMOS LAS FÍSICAS (COLISIONES) DE LO QUE ESTÁ OCULTO
-        foreach (var obj in aparecenConV) { CambiarColision(obj, false); }
-        foreach (var obj in aparecenConC) { CambiarColision(obj, false); }
+        // Clasificamos quién es quién y recolectamos sus materiales
+        AsignarMagiaAutomatica(aparecenConV, 0f);
+        AsignarMagiaAutomatica(desaparecenConV, 1f);
+        AsignarMagiaAutomatica(aparecenConC, 2f);
+        AsignarMagiaAutomatica(desaparecenConC, 3f);
 
-        // 2. ENCENDEMOS LAS FÍSICAS DE LO QUE ESTÁ VISIBLE
-        foreach (var obj in desaparecenConV)
-        {
-            if (obj != null && !aparecenConV.Contains(obj) && !aparecenConC.Contains(obj))
-                CambiarColision(obj, true);
-        }
-        foreach (var obj in desaparecenConC)
-        {
-            if (obj != null && !aparecenConV.Contains(obj) && !aparecenConC.Contains(obj))
-                CambiarColision(obj, true);
-        }
+        // Apagamos la onda inicial
+        ActualizarMateriales(0f, 1f, Vector3.zero, Color.black);
+        ActualizarColisionesIniciales();
     }
 
     void Update()
     {
-        if (jugadorEnZona && !yaSeUso)
+        // YA NO HACE FALTA ESTAR DENTRO DE UNA ZONA. FUNCIONARÁ EN TODO EL MAPA PARA PROBARLO.
+        if (Input.GetKeyDown(KeyCode.V) && !expandiendo)
         {
-            if (Input.GetKeyDown(KeyCode.V)) PrepararOnda(true);
-            else if (Input.GetKeyDown(KeyCode.C)) PrepararOnda(false);
+            Debug.Log("¡V Pulsada! Onda de Naturaleza en camino...");
+            PrepararOnda(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.C) && !expandiendo)
+        {
+            Debug.Log("¡C Pulsada! Onda de Corrupción en camino...");
+            PrepararOnda(false);
         }
 
-        if (expandiendoV)
+        if (expandiendo)
         {
             radioActual += (radioMaximo / segundosExpansion) * Time.deltaTime;
-            Shader.SetGlobalFloat("_RadioCreacion", radioActual);
-            ProcesarFisicasAlTocar();
-            if (radioActual >= radioMaximo) expandiendoV = false;
-        }
 
-        if (expandiendoC)
-        {
-            radioActual += (radioMaximo / segundosExpansion) * Time.deltaTime;
-            Shader.SetGlobalFloat("_RadioCorrupcion", radioActual);
-            ProcesarFisicasAlTocar();
-            if (radioActual >= radioMaximo) expandiendoC = false;
+            // FORZAMOS LA ACTUALIZACIÓN EN CADA MATERIAL (100% libre de bugs)
+            ActualizarMateriales(radioActual, esOndaV ? 1f : 0f, centroOnda, esOndaV ? colorV : colorC);
+            ActualizarColisionesEnTiempoReal();
+
+            if (radioActual >= radioMaximo)
+            {
+                expandiendo = false;
+                Debug.Log("La onda ha llegado a su fin.");
+            }
         }
     }
 
     private void PrepararOnda(bool esV)
     {
-        yaSeUso = true;
+        expandiendo = true;
         radioActual = 0f;
-        centroOnda = jugadorTransform.position;
 
-        if (esV)
+        // Buscamos al jugador. Si no lo encuentra, usa la cámara como centro.
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        centroOnda = player != null ? player.transform.position : Camera.main.transform.position;
+
+        esOndaV = esV;
+        ActualizarColisionesIniciales();
+    }
+
+    private void ActualizarMateriales(float radio, float ondaEsV, Vector3 centro, Color colorLaser)
+    {
+        foreach (Material mat in todosLosMateriales)
         {
-            expandiendoV = true;
-            Shader.SetGlobalVector("_PosOndaCreacion", centroOnda);
-            pendientesAparecer = new List<GameObject>(aparecenConV);
-            pendientesDesaparecer = new List<GameObject>(desaparecenConV);
+            if (mat != null)
+            {
+                mat.SetFloat("_RadioOnda", radio);
+                mat.SetFloat("_OndaEsV", ondaEsV);
+                mat.SetVector("_CentroOnda", centro);
+                mat.SetFloat("_GrosorLaser", grosorLaser);
+                mat.SetColor("_ColorLaserOnda", colorLaser);
+            }
+        }
+    }
+
+    private void ActualizarColisionesIniciales()
+    {
+        CambiarColision(aparecenConV, false);
+        CambiarColision(aparecenConC, false);
+        CambiarColision(desaparecenConV, true);
+        CambiarColision(desaparecenConC, true);
+    }
+
+    private void ActualizarColisionesEnTiempoReal()
+    {
+        if (esOndaV)
+        {
+            RevisarColisionConOnda(aparecenConV, true);
+            RevisarColisionConOnda(desaparecenConV, false);
         }
         else
         {
-            expandiendoC = true;
-            Shader.SetGlobalVector("_PosOndaCorrupcion", centroOnda);
-            pendientesAparecer = new List<GameObject>(aparecenConC);
-            pendientesDesaparecer = new List<GameObject>(desaparecenConC);
+            RevisarColisionConOnda(aparecenConC, true);
+            RevisarColisionConOnda(desaparecenConC, false);
         }
     }
 
-    private void ProcesarFisicasAlTocar()
+    private void RevisarColisionConOnda(List<GameObject> lista, bool estadoObjetivo)
     {
-        // Encendemos colisiones cuando la onda pasa
-        for (int i = pendientesAparecer.Count - 1; i >= 0; i--)
+        foreach (GameObject obj in lista)
         {
-            GameObject obj = pendientesAparecer[i];
             if (obj != null && Vector3.Distance(obj.transform.position, centroOnda) <= radioActual)
             {
-                CambiarColision(obj, true);
-                pendientesAparecer.RemoveAt(i);
-            }
-        }
-
-        // Apagamos colisiones cuando la onda pasa
-        for (int i = pendientesDesaparecer.Count - 1; i >= 0; i--)
-        {
-            GameObject obj = pendientesDesaparecer[i];
-            if (obj != null && Vector3.Distance(obj.transform.position, centroOnda) <= radioActual)
-            {
-                CambiarColision(obj, false);
-                pendientesDesaparecer.RemoveAt(i);
+                Collider col = obj.GetComponent<Collider>();
+                if (col != null) col.enabled = estadoObjetivo;
             }
         }
     }
 
-    // Pequeña función para apagar/encender solo el componente Collider
-    private void CambiarColision(GameObject obj, bool estado)
+    private void CambiarColision(List<GameObject> lista, bool estado)
     {
-        if (obj == null) return;
-        Collider col = obj.GetComponent<Collider>();
-        if (col != null) col.enabled = estado;
+        foreach (GameObject obj in lista)
+        {
+            if (obj != null)
+            {
+                Collider col = obj.GetComponent<Collider>();
+                if (col != null) col.enabled = estado;
+            }
+        }
     }
 
-    void OnTriggerEnter(Collider other) { if (other.CompareTag("Player")) { jugadorEnZona = true; jugadorTransform = other.transform; } }
-    void OnTriggerExit(Collider other) { if (other.CompareTag("Player")) jugadorEnZona = false; }
+    private void AsignarMagiaAutomatica(List<GameObject> lista, float tipoObjeto)
+    {
+        foreach (GameObject obj in lista)
+        {
+            if (obj != null)
+            {
+                Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+                foreach (Renderer ren in renderers)
+                {
+                    foreach (Material mat in ren.materials)
+                    {
+                        mat.SetFloat("_TipoObjeto", tipoObjeto);
+                        // Guardamos el material en nuestra lista blindada
+                        if (!todosLosMateriales.Contains(mat)) todosLosMateriales.Add(mat);
+                    }
+                }
+            }
+        }
+    }
 }
