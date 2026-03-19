@@ -73,7 +73,7 @@ Material:
     - _Radius: 1
     - _Softness: 1
     - _TipoMagia: 0
-    - _TipoObjeto: 2
+    - _TipoObjeto: 4
     m_Colors:
     - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _CentroOnda: {r: 0, g: 0, b: 0, a: 0}

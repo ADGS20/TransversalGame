@@ -298,6 +298,7 @@ MonoBehaviour:
   aparecenConV:
   - {fileID: 1129017018}
   - {fileID: 1504336365}
+  - {fileID: 0}
   desaparecenConV:
   - {fileID: 1831374183}
   aparecenConC:
@@ -1007,6 +1008,75 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 67565f1537bba5e4fa985ebe0d8e5f11, type: 3}
   m_PrefabInstance: {fileID: 902851081}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &930651387
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a6424108c06d2114fa745a4f0491b06e, type: 2}
+    - target: {fileID: 1865222944940723081, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: jugador
+      value: 
+      objectReference: {fileID: 1511493763}
+    - target: {fileID: 2383728215584549735, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_Name
+      value: SM_Arbol_Beta (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 18.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6827759738198846443, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
 --- !u!1 &997011885
 GameObject:
   m_ObjectHideFlags: 0
@@ -2235,18 +2305,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
-      propertyPath: m_Materials.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
-      propertyPath: 'm_Materials.Array.data[1]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 3b6e2aa0e4976fb4e88ed142d184a386, type: 2}
-    - target: {fileID: 1647346341085572295, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
-      propertyPath: 'm_Materials.Array.data[2]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 3b6e2aa0e4976fb4e88ed142d184a386, type: 2}
     - target: {fileID: 1865222944940723081, guid: fd749f598da4dfd4994a713e0f4fd6a7, type: 3}
       propertyPath: jugador
       value: 
@@ -2612,6 +2670,7 @@ SceneRoots:
   - {fileID: 192772600}
   - {fileID: 155573624}
   - {fileID: 1286115638}
+  - {fileID: 930651387}
   - {fileID: 1504336364}
   - {fileID: 902851081}
   - {fileID: 1831374182}

@@ -53,15 +53,21 @@ Material:
     m_Floats:
     - _Grosor: 0.04
     - _GrosorBorde: 0.3
+    - _GrosorLaser: 0
+    - _OndaEsV: 0
     - _Opacidad: 2
     - _Opacity: 2
     - _QueueControl: 0
     - _QueueOffset: 0
     - _RadioCorrupcion: 0
     - _RadioCreacion: 0
+    - _RadioOnda: 0
     - _TipoMagia: 0
+    - _TipoObjeto: 4
     m_Colors:
+    - _CentroOnda: {r: 0, g: 0, b: 0, a: 0}
     - _ColorBorde: {r: 0, g: 0, b: 0, a: 1}
+    - _ColorLaserOnda: {r: 0, g: 0, b: 0, a: 1}
     - _Colorcontorno: {r: 0, g: 0, b: 0, a: 1}
     - _PosOndaCorrupcion: {r: 0, g: 0, b: 0, a: 0}
     - _PosOndaCreacion: {r: 0, g: 0, b: 0, a: 0}
